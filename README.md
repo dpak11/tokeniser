@@ -46,3 +46,28 @@ app.get('/getcookie', (req, res) => {
 
 ```
 
+
+### Tokeniser format
+
+Below is the tokeniser output format where your actual `data` is encoded, and the signature of the output data is stored in `sign`.
+This gets stored as a `cookie`
+
+```
+{
+  "data": "RV9FXzdfNV85X1hfdF9rX1JfZl90X1ZfTl9WXzJfc19aX2lfdF8rXzlfS185X1Zfcl9PX2VfZ185XzNfQ19WX1BfeV9lX2dfNF9NXzFfV18=",
+  "sign": "db9e7dd82d03f389670376ad9da7e561237a0ea53962d6b79c2c211adb4d5469"
+}
+
+```
+
+The data:
+
+```
+tokeniser.setToken({
+    cookieName: "supercookie",
+    cookieData: { name: "aaa", role: "none" },
+    secretKey: "simplePassword",
+    expiresIn: "5m",
+    response: res
+});
+```
