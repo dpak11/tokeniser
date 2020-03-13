@@ -1,9 +1,7 @@
 const { SHA256 } = require('crypto-js');
-const strSequence = "poiuytrewq+/=asdfghjklmnbv0123456789cxzQWERTYUIOPLKJHGFDSAZXCVBNM";
 
+function encodeCookieData(data, hKey) {
 
-function encodeCookieData(data, hKey) {   
-    
     //qwertyuiop
     //poiuytrewq
     // Example:
@@ -16,27 +14,44 @@ function encodeCookieData(data, hKey) {
     let b64Data = Buffer.from(JSON.stringify(data), 'binary').toString('base64');
     let base64Data = b64Data.split("").reverse();
     let alteredBase64 = [];
-    base64Data.forEach((base) => {        
+    base64Data.forEach((base) => {
         let index = uniqueSequence.reversed.indexOf(base);
         alteredBase64.push(`${uniqueSequence.unique[index]}_`)
-    });    
+    });
     return Buffer.from(alteredBase64.join(""), 'binary').toString('base64')
 }
 
-function decodeCookieData(data, hKey) {
+function decodeCookieData(encdata, hKey) {
+    let obj = null;
+    try {
+        obj = JSON.parse(Buffer.from(encdata, "base64").toString('ascii'));
+        console.log("try block:");
+        console.log(obj);
+    } catch (e) {
+        return false;
+    }
+
+    try{
+        let uniqueSequence = getUniqueKey(hKey);
+        let _data = Buffer.from(obj.data, "base64").toString('ascii');
+        let d = _data.split("_");
+        let altered = [];
+        d.forEach((val) => {
+            let index = uniqueSequence.unique.indexOf(val);
+            altered.push(uniqueSequence.reversed[index])
+        });
+
+        let base64 = altered.reverse().join("");
+        base64 = Buffer.from(altered.join(""), 'base64').toString('binary');
+        return {
+            data: JSON.parse(base64),
+            sign: obj.sign
+        }
+    } catch (e) {
+        console.log("Invalid Password")
+        return false;
+    }
     
-    let uniqueSequence = getUniqueKey(hKey);
-    let _data = Buffer.from(data, "base64").toString('ascii');
-    let d = _data.split("_");
-    let altered = [];
-    d.forEach((val) => {        
-        let index = uniqueSequence.unique.indexOf(val);
-        altered.push(uniqueSequence.reversed[index])
-    }); 
-    
-    let base64 = altered.reverse().join("");
-    base64 = Buffer.from(altered.join(""), 'base64').toString('binary');
-    return JSON.parse(base64);
 
 }
 
@@ -49,26 +64,43 @@ function hashCookieToken(data, key) {
     return SHA256(base64).toString();
 }
 
-function getUniqueKey(hKey){
+function getUniqueKey(hKey) {
+    const strSequence = "poiuytrewq+/=asdfghjklmnbv0123456789cxzQWERTYUIOPLKJHGFDSAZXCVBNM";
     let base64Hkey = Buffer.from(JSON.stringify(hKey), 'binary').toString('base64');
-    let hSet = new Set([...base64Hkey,...strSequence]);
+    let hSet = new Set([...base64Hkey, ...strSequence]);
     let uniqueSequence = [...hSet];
     let reverseUnique = [...hSet].reverse();
-    return {unique:uniqueSequence, reversed:reverseUnique}
+    return { unique: uniqueSequence, reversed: reverseUnique }
 
 }
 
-
-function setToken({ cookieName, cookieData, secretKey, expiresIn, response = null }) {
-    
-    //expiresIn examples: 10s,10m,2h,4d
-    if (typeof cookieName != "string") {
-        return {
-            error: true,
-            status: "Invalid CookieName",
-            cookie: null
-        }
+function errorLog(err) {
+    return {
+        error: true,
+        status: err,
+        value: null
     }
+}
+
+
+function set({ type = "cookie", name = null, data, secretKey, expiresIn = "15m", response = null }) {
+
+    if (type !== "token" && type !== "cookie") {
+        return errorLog("Tokeniser: 'type' parameter must be 'cookie' or 'token'");
+    }
+
+    if (type == "cookie" && name == null) {
+        return errorLog("Tokeniser: 'name' parameter expected");
+    }
+
+    if (type == "cookie" && typeof name != "string") {
+        return errorLog("Tokeniser: Cookie name must be a valid string");
+    }
+    if (type == "cookie" && (/^[a-z0-9_]{1,20}$/i).test(name) === false) {
+        return errorLog("Tokeniser: 'name' must be Aphanumberic (max length 20)");
+    }
+
+
     if ((/^[0-9]{1,3}[smhd]{1}$/).test(expiresIn)) {
         let lastStr = expiresIn.slice(expiresIn.length - 1);
         let expireNum = Number(expiresIn.slice(0, expiresIn.length - 1));
@@ -77,58 +109,89 @@ function setToken({ cookieName, cookieData, secretKey, expiresIn, response = nul
         if (lastStr == "m") { maxCookieAge = 1000 * expireNum * 60 }
         if (lastStr == "h") { maxCookieAge = 1000 * expireNum * 3600 }
         if (lastStr == "d") { maxCookieAge = 1000 * expireNum * 3600 * 24 }
-        let hashed = hashCookieToken(cookieData, SHA256(secretKey).toString());
-        let encodedData = encodeCookieData(cookieData, SHA256(secretKey).toString());
+        let hashed = hashCookieToken(data, SHA256(secretKey).toString());
+        let encodedData = encodeCookieData(data, SHA256(secretKey).toString());
         let encodeHashed = {
             data: encodedData,
             sign: hashed
         };
-        if (response) {
-            response.cookie(cookieName, encodeHashed, { maxAge: maxCookieAge });
+
+        if (response != null) {
+            let enc_data = Buffer.from(JSON.stringify(encodeHashed)).toString('base64');
+            if (type == "token") {
+                response.set('Access-Control-Allow-Headers', 'Authorization');
+                response.set('Access-Control-Request-Headers', 'Authorization');
+                response.set('Access-Control-Expose-Headers', 'Authorization');
+                response.header("Authorization", `Bearer ${enc_data}`);
+            } else {
+                response.cookie(name, enc_data, { maxAge: maxCookieAge, httpOnly: true });
+            }
+
         }
 
         return {
             error: false,
             status: "ok",
-            cookie: encodeHashed
+            value: encodeHashed
         }
     }
-    return {
-        error: true,
-        status: "You have set an invalid expiration period.",
-        cookie: null
-    }
+    return errorLog("Tokeniser: Invalid 'expiresIn' parameter");
 
 }
 
-function getToken({ cookieName, secretKey, request }) {
-    let cookie = request.cookies[cookieName];
-    if (typeof cookie == "undefined") {
-        return {
-            error: true,
-            status: "Cookie not found",
-            data: null
-        }
+function get({ type = "cookie", name = null, secretKey, request = null }) {
+    console.log("-------Get token --------");
+    /*console.log(request.headers);
+    console.log(request.headers["host"]);
+    console.log(request.headers["authorization"]);    
+    return { error: false, data: "dummydata" }*/
+
+    if (type !== "token" && type !== "cookie") {
+        return errorLog("Tokeniser: 'type' parameter must be 'cookie' or 'token'");
     }
-    let decodedData = decodeCookieData(cookie.data, SHA256(secretKey).toString());
-    let hashed = hashCookieToken(decodedData, SHA256(secretKey).toString());
-    if (hashed == cookie.sign) {
+    let encoded_data = null;
+    if (type == "cookie") {
+        if (name == null) {
+            return errorLog("Tokeniser: Cookie 'name' parameter expected");
+        }
+
+        if (typeof name != "string") {
+            return errorLog("Tokeniser: Cookie 'name' must be a valid string");
+        }
+
+        if ((/^[a-z0-9_]{1,20}$/i).test(name) === false) {
+            return errorLog("Tokeniser: 'name' must be Aphanumberic (max length 20)");
+        }
+        encoded_data = request.cookies[name];
+        if (typeof encoded_data == "undefined") {
+            return errorLog("Tokeniser: Cookie not found");
+        }
+
+    } else {
+        console.log(request.headers);
+        let authHeader = request.headers["authorization"];
+        console.log(authHeader);
+        encoded_data = authHeader.split("Bearer ")[1];
+    }
+
+    let decodedData = decodeCookieData(encoded_data, SHA256(secretKey).toString());
+    if (!decodedData) { return errorLog("Tokeniser: Corrupt data or Invalid Password") }
+    let hashed = hashCookieToken(decodedData.data, SHA256(secretKey).toString());
+    if (hashed == decodedData.sign) {
         return {
             error: false,
             status: "ok",
-            data: decodedData
+            value: decodedData.data
         }
     }
     return {
         error: true,
-        status: "Cookie has been tampered"
+        status: "Cookie has been tampered",
+        value: null
     }
 }
 
 
 module.exports = {
-    tokeniser: {
-        setToken,
-        getToken
-    }
+    tokeniser: { set, get }
 }
