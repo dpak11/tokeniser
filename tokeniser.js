@@ -102,6 +102,7 @@ function setToken({ cookieName, cookieData, secretKey, expiresIn, response = nul
 }
 
 function getToken({ cookieName, secretKey, request }) {
+    let cookie = request.cookies[cookieName];
     if (typeof cookie == "undefined") {
         return {
             error: true,
