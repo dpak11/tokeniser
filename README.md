@@ -1,7 +1,6 @@
 # Tokie
 
-`Tokie` lets you securely transmit cookie data and token from server(NodeJS) to client browser in a compact, self-contained manner. To ensure integrity, unique `signature`(digest) is attached along with `obfuscated` cookie or token using your `secretkey`
-
+`Tokie` lets you securely transmit and share cookie data and token from server(NodeJS) to client and between different parties in a compact, self-contained manner. To ensure integrity, unique `signature`(digest) is created using your `secretKey` and attached along with `obfuscated` cookie/token in the `http header`.
 
 
 
@@ -9,49 +8,105 @@
 
 
 ```js
-const express = require('express');
-const cookieParser = require('cookie-parser');
-const {tokeniser} = require('./tokeniser');
-const app = express();
-app.use(cookieParser());
 
-app.get('/setcookie', (req, res) => {
-    const mycookie = tokeniser.setToken({
-        cookieName: "mycookie",
-        cookieData: { name: "abcd", role: "admin" },
-        secretKey: "a_long_Password",
-        expiresIn: "5m", // example 5m => 5 minutes; 12s => 12 seconds; 3h => 3 hours; 2d => 2 days
+//---------------- COOKIE handling -----------------
+
+
+// 1. Save a Cookie
+
+app.get('/savecookie', (req, res) => {
+    const cookie = tokie.set({
+        type: "cookie",
+        name: "supercookie", 
+        data: {name:"joe", admin:"yes"},
+        secretKey: "Cookiecomplex-p@ssw0rd",
+        expiresIn: "5m",
         response: res
     });
-    if(mycookie.error){
-    	console.log(cookie.status);
-        // do something
-    }else{
-        // res.send(mycookie.cookie)
-        // or do something else
+    if (cookie.error) {
+        return res.send("Error Status:" + cookie.status);
     }
+    console.log(cookie.value);
+    res.send("cookie set successfuly")
+
 });
 
 
-app.get('/getcookie', (req, res) => {
-    const mycookie = tokeniser.getToken({
-        cookieName: "mycookie",
-        secretKey: "a_long_Password",
+// 2. Read a Cookie
+
+app.get('/readcookie', (req, res) => {
+    //shows all the cookies
+    const cookie = tokie.get({
+        type: "cookie",
+        name: "supercookie",
+        secretKey: "Cookiecomplex-p@ssw0rd",
         request: req
     });
-    if(!mycookie.error){
-    	console.log(mycookie.data);
-    	// do something with cookie data
+    if (cookie.error) {
+        return res.send("Error Status:" + cookie.status);
     }
+    console.log(cookie.value);
+    res.send(cookie.value);
+});
+
+
+
+
+
+
+
+
+//---------------- TOKEN Handling -----------------------
+
+
+// 3. Save a Signed Token to the Header
+
+app.get('/savetoken', (req, res) => {
+    const token = tokie.set({
+        type: "token",
+        data: {name:"bob", admin:"no"},
+        secretKey: "Tokencomplex-p@ssw0rd",
+        response: res
+    });
+    if (token.error) {
+        return res.send("Error Status:" + token.status);
+    }
+    console.log(token.value);
+    res.send(token.value)
+
+});
+
+
+// 4. Read a Signed Token from Header
+
+app.get('/readtoken', (req, res) => {
+    const token = tokie.get({
+        type: "token",
+        secretKey: "Tokencomplex-p@ssw0rd",
+        req: req
+    });
+    if (token.error) {
+        return res.send("Error Status:" + token.status);
+    }
+    console.log(token.value);
+    res.send(token.value)
+
+});
+
+
+
+app.listen(3000, (err) => {
+    if (err) throw err;
+    console.log('listening on port 3000');
 });
 
 ```
 
 
-### Tokeniser format
+### Tokie format (output)
 
-Below is the tokeniser output format where your actual `data` is encoded, and the signature of the output data is stored in `sign`.
-This gets stored as a `cookie`
+Below is the Tokie output where your actual `data` is encoded, and the signature of the output data is stored in `sign`.
+
 
 ```
 {
@@ -61,14 +116,33 @@ This gets stored as a `cookie`
 
 ```
 
-The data:
+### Storing the `cookie` data (input):
+
+For a `cookie`, the `name` and `expiresIn` parameters are `REQUIRED`.
+`response` parameter is `OPTIONAL`. If `response` is included, then the cookie gets automatically attached to the http response header. If not included, then tokie.set({...}) will return back the encoded data along with signature. 
 
 ```
-tokeniser.setToken({
-    cookieName: "supercookie",
-    cookieData: { name: "aaa", role: "none" },
-    secretKey: "simplePassword",
+tokie.set({
+    type: "cookie",
+    name: "supercookie",
+    data: {name:"aaa", role:"none"},
+    secretKey: "Cookiecomplex-p@ssw0rd",
     expiresIn: "5m",
-    response: res
+    response: res // optional
+});
+```
+
+
+### Storing the `token` data: (input)
+
+For a `token`, the `name` and `expiresIn` parameters and `NOT REQUIRED`.
+`response` parameter is `OPTIONAL`. If `response` is included, then the token gets automatically attached to the http response header. If not included, then tokie.set({...}) will return back the encoded data along with signature. 
+
+```
+const token = tokie.set({
+    type: "token",
+    data: {name:"bob", admin:"no"},
+    secretKey: "Tokencomplex-p@ssw0rd",
+    response: res // optional
 });
 ```
