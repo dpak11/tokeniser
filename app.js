@@ -1,7 +1,7 @@
 const express = require('express');
 //const cors = require('cors');
 const cookieParser = require('cookie-parser');
-const { tokeniser } = require('./tokeniser');
+const { tokie } = require('./tokie');
 const app = express();
 app.use(cookieParser());
 
@@ -23,7 +23,7 @@ app.use(cookieParser());
 // Save a Cookie
 
 app.get('/savecookie', (req, res) => {
-    const cookie = tokeniser.set({
+    const cookie = tokie.set({
         type: "cookie",
         name: "supercookie", 
         data: {name:"joe", admin:"yes"},
@@ -45,7 +45,7 @@ app.get('/savecookie', (req, res) => {
 
 app.get('/readcookie', (req, res) => {
     //shows all the cookies
-    const cookie = tokeniser.get({
+    const cookie = tokie.get({
         type: "cookie",
         name: "supercookie",
         secretKey: "Cookiecomplex-p@ssw0rd",
@@ -69,10 +69,11 @@ app.get('/readcookie', (req, res) => {
 // Save a Signed Token to the Header
 
 app.get('/savetoken', (req, res) => {
-    const token = tokeniser.set({
+    const token = tokie.set({
         type: "token",
         data: {name:"bob", admin:"no"},
         secretKey: "Tokencomplex-p@ssw0rd",
+        expiresIn: "5w",
         response: res
     });
     if (token.error) {
@@ -87,7 +88,7 @@ app.get('/savetoken', (req, res) => {
 // Read a Signed Token from Header
 
 app.get('/readtoken', (req, res) => {
-    const token = tokeniser.get({
+    const token = tokie.get({
         type: "token",
         secretKey: "Tokencomplex-p@ssw0rd",
         req: req
