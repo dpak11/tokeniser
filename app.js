@@ -44,7 +44,6 @@ app.get('/savecookie', (req, res) => {
 // Read a Cookie
 
 app.get('/readcookie', (req, res) => {
-    //shows all the cookies
     const cookie = tokie.get({
         type: "cookie",
         name: "supercookie",

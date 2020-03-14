@@ -1,15 +1,13 @@
 const { SHA256 } = require('crypto-js');
 
 function encodeData(data, hKey) {
-
-    //qwertyuiop
-    //poiuytrewq
+    
     // Example:
     // if uniqueSequence =     "3grj7ey48f/10vu"
     // reverseUnique    =      "uv01/f84ye7jrg3";
     // base64data     =        "7gywesadasew423uhd"
-    // loop through base64data, replace all occurences of '7 in base64Data by '/_'(from unique sequence corresponds 7 in reverse unique).
-    // Similarly 'g' relaced by 'v_', 'y' replaces '8_' and so on...
+    // loop through base64data, replace all occurences of '7 in base64Data by '/_'(refer unique sequence).
+    // Similarly 'g' relaced by 'v_', 'y' replaced by '8_' and so on...
     let uniqueSequence = getUniqueKey(hKey);
     let b64Data = Buffer.from(JSON.stringify(data), 'binary').toString('base64');
     let base64Data = b64Data.split("").reverse();
@@ -25,8 +23,6 @@ function decodeData(encdata, hKey) {
     let obj = null;
     try {
         obj = JSON.parse(Buffer.from(encdata, "base64").toString('ascii'));
-        console.log("try block:");
-        console.log(obj);
     } catch (e) {
         return false;
     }
@@ -51,7 +47,6 @@ function decodeData(encdata, hKey) {
         console.log("Invalid Password")
         return false;
     }
-
 
 }
 
@@ -110,7 +105,7 @@ function set({ type = "cookie", name = null, data, secretKey, expiresIn = "15m",
             if (lastStr == "m") { maxCookieAge = 1000 * expireNum * 60 }
             if (lastStr == "h") { maxCookieAge = 1000 * expireNum * 3600 }
             if (lastStr == "d") { maxCookieAge = 1000 * expireNum * 3600 * 24 }
-        }else{
+        } else {
             return errorLog("Tokie: Invalid 'expiresIn' parameter");
         }
     }
@@ -144,11 +139,6 @@ function set({ type = "cookie", name = null, data, secretKey, expiresIn = "15m",
 }
 
 function get({ type = "cookie", name = null, secretKey, request = null }) {
-    console.log("-------Get token --------");
-    /*console.log(request.headers);
-    console.log(request.headers["host"]);
-    console.log(request.headers["authorization"]);    
-    return { error: false, data: "dummydata" }*/
 
     if (type !== "token" && type !== "cookie") {
         return errorLog("Tokie: 'type' parameter must be 'cookie' or 'token'");
@@ -172,10 +162,13 @@ function get({ type = "cookie", name = null, secretKey, request = null }) {
         }
 
     } else {
-        console.log(request.headers);
-        let authHeader = request.headers["authorization"];
-        console.log(authHeader);
-        encoded_data = authHeader.split("Bearer ")[1];
+        try {
+            let authHeader = request.headers["authorization"];
+            encoded_data = authHeader.split("Bearer ")[1];
+        } catch (e) {
+            return errorLog("Tokie: Unable to find Token")
+        }
+
     }
 
     let decodedData = decodeData(encoded_data, SHA256(secretKey).toString());
