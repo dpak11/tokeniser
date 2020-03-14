@@ -1,6 +1,6 @@
 # Tokie
 
-`Tokie` lets you securely transmit and share cookie data and token from server(NodeJS) to client and between different parties in a compact, self-contained manner. To ensure integrity, unique `signature`(digest) is created using your `secretKey` and attached along with `obfuscated` cookie/token in the `http header`.
+`Tokie` lets you securely transmit/share data as cookies and tokens from server(NodeJS) to client, and between different parties in a compact, self-contained manner. To ensure integrity, unique `signature`(digest) is created using your `secretKey` and attached along with `obfuscated` cookie/token in the `http header`.
 
 
 
@@ -8,6 +8,12 @@
 
 
 ```js
+
+const express = require('express');
+const { tokie } = require('./tokie');
+const app = express();
+
+
 
 //---------------- COOKIE handling -----------------
 
@@ -119,7 +125,10 @@ Below is the Tokie output where your actual `data` is encoded, and the signature
 ### Storing the `cookie` data (input):
 
 For a `cookie`, the `name` and `expiresIn` parameters are `REQUIRED`.
-`response` parameter is `OPTIONAL`. If `response` is included, then the cookie gets automatically attached to the http response header. If not included, then tokie.set({...}) will return back the encoded data along with signature. 
+
+`response` parameter is `OPTIONAL`. 
+
+If `response` is included, then the cookie gets automatically attached to the http response header. If not included, then tokie.set({...}) will return back the encoded data along with signature. 
 
 ```
 tokie.set({
@@ -136,7 +145,10 @@ tokie.set({
 ### Storing the `token` data: (input)
 
 For a `token`, the `name` and `expiresIn` parameters and `NOT REQUIRED`.
-`response` parameter is `OPTIONAL`. If `response` is included, then the token gets automatically attached to the http response header. If not included, then tokie.set({...}) will return back the encoded data along with signature. 
+
+`response` parameter is `OPTIONAL`. 
+
+If `response` is included, then the token gets automatically attached to the http response header. If not included, then tokie.set({...}) will return back the encoded data along with signature. 
 
 ```
 const token = tokie.set({
