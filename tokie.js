@@ -190,7 +190,7 @@ function get({ type = "cookie", name = null, secretKey, tokenKey=null, request =
         }
 
     } else {
-        console.log(typeof tokenKey);
+        
         if(typeof tokenKey == "string"){
             encoded_data = tokenKey;
         }else{

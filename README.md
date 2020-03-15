@@ -1,6 +1,6 @@
 # Tokie
 
-`Tokie` lets you securely share data in form of a `token` or a `cookie` from server(NodeJS) to client, and between different parties in a compact, secure manner. To ensure integrity, a unique `signature`(digest) is created using a `secretKey` and attached along with `obfuscated` token(and cookie).
+`Tokie` lets you securely share data in form of a `token` or a `cookie` from server(NodeJS) to client, and between different parties in a compact, secure manner. To ensure integrity, a unique `signature`(digest) is created using a `secretKey` and attached along with `obfuscated` token(and cookie). Tokie uses `SHA256`
 
 
 
@@ -31,7 +31,9 @@ Output is further encoded to be used as `API key`.
 `response` parameter is `OPTIONAL`. 
 
 If `response` is included, then the `token` gets automatically attached to the `http` response header. 
+
 `Authorisation Bearer {token}`  
+
 If not included, then `tokie.set({...})` will only return back the encoded data. 
 
 `expiresIn` is the expiry period of the token. 
@@ -46,7 +48,7 @@ Example:
 
 
 ```js
-const cookie = tokie.set({
+    tokie.set({
         type: "token",
         data: { name: "joe", admin: "yes" },
         secretKey: "Cookiecomplex-p@ssw0rd",
