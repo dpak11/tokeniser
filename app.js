@@ -1,21 +1,10 @@
 const express = require('express');
-//const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const { tokie } = require('./tokie');
 const app = express();
 
 app.use(bodyParser.json({ limit: '5mb' }));
 app.use(bodyParser.urlencoded({ extended: true }));
-//app.use(cookieParser());
-/*app.use((req, res, next) => {
-    res.append('Access-Control-Allow-Origin', ['*']);
-    res.append('Access-Control-Allow-Methods', 'GET,HEAD,PUT,POST,DELETE');
-    res.set('Access-Control-Allow-Headers', 'Authorization');
-    res.set('Access-Control-Request-Headers', 'Authorization');
-    res.set('Access-Control-Expose-Headers', 'Authorization');
-    next();
-});*/
-
 
 
 
