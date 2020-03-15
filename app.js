@@ -1,11 +1,12 @@
 const express = require('express');
-//const cors = require('cors');
-const cookieParser = require('cookie-parser');
+//const cookieParser = require('cookie-parser');
+const bodyParser = require('body-parser');
 const { tokie } = require('./tokie');
 const app = express();
-app.use(cookieParser());
 
-//app.use(cors());
+app.use(bodyParser.json({ limit: '5mb' }));
+app.use(bodyParser.urlencoded({ extended: true }));
+//app.use(cookieParser());
 /*app.use((req, res, next) => {
     res.append('Access-Control-Allow-Origin', ['*']);
     res.append('Access-Control-Allow-Methods', 'GET,HEAD,PUT,POST,DELETE');
@@ -16,27 +17,68 @@ app.use(cookieParser());
 });*/
 
 
+
+
+
+//---------------- TOKEN Handling -----------------------
+
+
+// Save a Signed Token to the Header
+
+app.post('/savetoken', (req, res) => {
+    const { name, admin, password } = req.body;
+    const token = tokie.set({
+        type: "token",
+        data: { name, admin },
+        secretKey: password,
+        expiresIn: "5m"
+    });
+    if (token.error) {
+        return res.send(token.status);
+    }
+    res.send(token.value)
+
+});
+
+// Read a Signed Token from Header
+
+app.get('/readtoken', (req, res) => {
+    const { pass, apikey } = req.query;
+    const token = tokie.get({
+        type: "token",
+        secretKey: pass,
+        tokenKey: apikey
+        //request: req 
+    });
+    if (token.error) {
+        return res.send(token.status);
+    }
+    res.send(token.value)
+
+});
+
+
+
+
 //---------------- COOKIE handling -----
 
 
 
 // Save a Cookie
 
-app.get('/savecookie', (req, res) => {
+app.post('/savecookie', (req, res) => {
     const cookie = tokie.set({
         type: "cookie",
-        name: "supercookie", 
-        data: {name:"joe", admin:"yes"},
+        name: "supercookie",
+        data: { name: "joe", admin: "yes" },
         secretKey: "Cookiecomplex-p@ssw0rd",
         expiresIn: "5m",
         response: res
     });
     if (cookie.error) {
-        console.log(cookie.status);
         return res.send(cookie.status);
     }
-    console.log(cookie.value);
-    res.send("cookie set successfuly")
+    res.send(cookie.value)
 
 });
 
@@ -53,55 +95,14 @@ app.get('/readcookie', (req, res) => {
     if (cookie.error) {
         return res.send(cookie.status);
     }
-    console.log(cookie.value);
-    return res.send("cookie loaded");
+    return res.send(cookie.value);
 });
 
 
 
-
-
-
-//---------------- TOKEN Handling -----------------------
-
-
-// Save a Signed Token to the Header
-
-app.get('/savetoken', (req, res) => {
-    const token = tokie.set({
-        type: "token",
-        data: {name:"bob", admin:"no"},
-        secretKey: "Tokencomplex-p@ssw0rd",
-        expiresIn: "5w",
-        response: res
-    });
-    if (token.error) {
-        console.log(token.status);
-        return res.send(token.status);
-    }
-    console.log(token.value);
-    res.send("token set successfuly")
-
+app.get('/home', (req, res) => {
+    res.sendFile(__dirname + "/index.html")
 });
-
-// Read a Signed Token from Header
-
-app.get('/readtoken', (req, res) => {
-    const token = tokie.get({
-        type: "token",
-        secretKey: "Tokencomplex-p@ssw0rd",
-        req: req
-    });
-    if (token.error) {
-        console.log(token.status);
-        return res.send(token.status);
-    }
-    console.log(token.value);
-    res.send("token set successfuly")
-
-});
-
-
 
 
 
