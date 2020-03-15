@@ -7,7 +7,7 @@
 ### Tokie format
 
 Below is the Tokie output where your actual `data` is encoded, and the signature is stored in `sign`.
-This output gets further encoded to be used as `API key`.
+Output is further encoded to be used as `API key`.
 
 ```
 {
@@ -22,13 +22,17 @@ This output gets further encoded to be used as `API key`.
 
 
 
-### Storing data into `token`: (input)
 
-`tokie.set()` will create a unique token using your `data`, `secretKey`. This token gets attached to `Authorisation Header` if you specify it in the parameter section.
+
+### Storing data into a `token`: 
+
+`tokie.set()` will create a unique token using your `data` and `secretKey`. This token gets attached to `Authorisation Header` (if specified in the `response` parameter). 
 
 `response` parameter is `OPTIONAL`. 
 
-If `response` is included, then the `token` gets automatically attached to the `http` response header. If not included, then `tokie.set({...})` will return back the encoded data. 
+If `response` is included, then the `token` gets automatically attached to the `http` response header. 
+`Authorisation Bearer {token}`  
+If not included, then `tokie.set({...})` will only return back the encoded data. 
 
 `expiresIn` is the expiry period of the token. 
 
@@ -55,13 +59,13 @@ const cookie = tokie.set({
 
 
 
-### Storing the `cookie` data (input):
+### Storing data into a `cookie` (input):
 
 Now in case of a `cookie`, the `name` parameter is `REQUIRED`, unlike in `token`.
 
 `response` parameter is `OPTIONAL`. 
 
-If `response` is included, then the `cookie` gets automatically attached to the `http response header`. If not included, then `tokie.set({...})` will return back the encoded data. 
+If `response` is included, then the `cookie` gets automatically attached to the `http response header`. If not included, then `tokie.set({...})` will only return back the encoded data. 
 
 ```js
 tokie.set({
@@ -163,8 +167,8 @@ app.get('/read_token_query', (req, res) => {
 app.get('/read_token_header', (req, res) => {
     
     const token = tokie.get({
-        type: "token", //This is REQUIRED
-        secretKey: "some-Complex-Password", //This is REQUIRED
+        type: "token", 
+        secretKey: "some-Complex-Password", 
         request: req // This is REQUIRED for reading token from Header
     });
     if (token.error) {
@@ -183,6 +187,8 @@ app.listen(3000, (err) => {
 });
 
 ```
+
+
 
 
 
@@ -212,8 +218,8 @@ app.post('/savecookie', (req, res) => {
         name: "supercookie", 
         data: { name: "joe", admin: "yes" }, 
         secretKey: "Cookiecomplex-p@ssw0rd", 
-        expiresIn: "5m", //This is REQUIRED
-        response: res //This is OPTIONAL. 
+        expiresIn: "5m", 
+        response: res 
     });
     if (cookie.error) {
         return res.send(cookie.status);
