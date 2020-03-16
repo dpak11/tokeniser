@@ -6,8 +6,8 @@
 
 ### Tokie format
 
-Below is the Tokie output where your actual `data` is encoded, and the signature is stored in `sign`.
-Output is further encoded to be used as `API key`.
+Below is a sample Tokie output containing your actual `data` in encoded form, and the signature stored in `sign`.
+This is further encoded to be used as `API key`(token).
 
 ```
 {
@@ -26,15 +26,15 @@ Output is further encoded to be used as `API key`.
 
 ### Storing data into a `token`: 
 
-`tokie.set()` will create a unique token using your `data` and `secretKey`. This token gets attached to `Authorisation Header` (if specified in the `response` parameter). 
+`tokie.set()` will create a unique token using your `data` and `secretKey`. This token gets attached to `Authorisation Header` (if only specified). 
 
 `response` parameter is `OPTIONAL`. 
 
-If `response` is included, then the `token` gets automatically attached to the `http` response header. 
+If `response` is included, then the `token` gets automatically attached to the `response header`. 
 
 `Authorisation Bearer {token}`  
 
-If not included, then `tokie.set({...})` will only return back the encoded data. 
+If not included, then `tokie.set({...})` will only return back the encoded (and signed) data. You can then trasmit/share this encoded data to client side in whichever way you prefer. 
 
 `expiresIn` is the expiry period of the token. 
 
@@ -51,7 +51,7 @@ Example:
     tokie.set({
         type: "token",
         data: { name: "joe", admin: "yes" },
-        secretKey: "Cookiecomplex-p@ssw0rd",
+        secretKey: "token-complex-p@ssw0rd",
         expiresIn: "5m", // 5 minutes
         response: res // optional
     });
@@ -61,19 +61,19 @@ Example:
 
 
 
-### Storing data into a `cookie` (input):
+### Storing data into a `cookie`:
 
 Now in case of a `cookie`, the `name` parameter is `REQUIRED`, unlike in `token`.
 
 `response` parameter is `OPTIONAL`. 
 
-If `response` is included, then the `cookie` gets automatically attached to the `http response header`. If not included, then `tokie.set({...})` will only return back the encoded data. 
+If `response` is included, then the `cookie` gets automatically attached to the `response header`. If not included, then `tokie.set({...})` will only return back the encoded data. 
 
 ```js
 tokie.set({
     type: "cookie",
     name: "supercookie",
-    data: {name:"aaa", role:"none"},
+    data: {name:"tom", role:"admin"},
     secretKey: "Cookiecomplex-p@ssw0rd",
     expiresIn: "5m",
     response: res // optional
@@ -85,6 +85,7 @@ tokie.set({
 
 ## Token Usage (app.js)
 
+1) Create a Signed Token and return the token, but do not attach it to Authorisation Header
 
 ```js
 
@@ -96,11 +97,6 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-
-
-
-
-//---------------- TOKEN Handling -----------------------
 
 
 // Create a Signed Token and return the token, but do not attach it to Authorisation Header
@@ -120,10 +116,12 @@ app.post('/createtoken', (req, res) => {
 
 });
 
+```
 
 
-// Create a Signed Token and return the token, and also attach it to Authorisation Header
+2) Create a Signed Token and return the token, and also attach it to Authorisation Header
 
+```js
 app.post('/createtoken_header', (req, res) => {
     const { name, admin, password } = req.body;
     const token = tokie.set({
@@ -140,16 +138,18 @@ app.post('/createtoken_header', (req, res) => {
 
 });
 
+```
 
+3) Read a Signed Token from Query Parameter:
 
-/* Read a Signed Token from Query Parameter
+After you have created a signed token, you can then transmit this token as query parameter in the URL. Below, `my_token` contains your signed token. Here `request` parameter 
 
-EXAMPLE: http://localhost:3000/read_token_query?tokenKey=eyJkYXRhIjoiYkY5c1gxZGZSVjkyjdkfrye8rfs
+`http://localhost:3000/read_token_query?my_token=eyJkYXRhIjoiYkY5c1gxZGZSVjkyjdkfrye8rfs`
+ 
 
-*/
+```js
 app.get('/read_token_query', (req, res) => {
-    const TOKEN_KEY = req.query.tokenKey;
-    // read_token_query?tokenKey=eyJkYXRhIjoiYkY5c1gxZGZSVjkyjdkfrye8rfs
+    const TOKEN_KEY = req.query.my_token;
     const token = tokie.get({
         type: "token",
         secretKey: "some-Complex-Password",
@@ -162,12 +162,17 @@ app.get('/read_token_query', (req, res) => {
 
 });
 
+````
 
 
-// Read a Signed Token from Authorisation Header
+4) Read a Signed Token from Authorisation Header:
 
-app.get('/read_token_header', (req, res) => {
-    
+If you choose to transmit signed token through the Header, you MUST include the `request` parameter.
+(`tokenKey` parameter is not required in this case)
+
+
+```js
+app.get('/read_token_header', (req, res) => {    
     const token = tokie.get({
         type: "token", 
         secretKey: "some-Complex-Password", 
@@ -182,12 +187,6 @@ app.get('/read_token_header', (req, res) => {
 
 
 
-
-app.listen(3000, (err) => {
-    if (err) throw err;
-    console.log('listening on port 3000');
-});
-
 ```
 
 
@@ -197,6 +196,9 @@ app.listen(3000, (err) => {
 
 ## Cookie Usage (app.js)
 
+1) Save a cookie to Header:
+
+When saving a `cookie`, you need to specify the `name` of the cookie. Though `response` parameter is optional, in most use cases you MUST include it in case of a cookie.
 
 ```js
 const express = require('express');
@@ -206,13 +208,6 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-
-
-//---------------- COOKIE handling -----
-
-
-
-// Save a Cookie
 
 app.post('/savecookie', (req, res) => {
     const cookie = tokie.set({
@@ -229,8 +224,15 @@ app.post('/savecookie', (req, res) => {
     res.send(cookie.value)
 
 });
+```
 
 
+
+2) Read a Cookie:
+
+Always include `request` parameter for reading a cookie.
+
+```js
 // Read a Cookie
 
 app.get('/readcookie', (req, res) => {
@@ -238,7 +240,7 @@ app.get('/readcookie', (req, res) => {
         type: "cookie", 
         name: "supercookie", 
         secretKey: "Cookiecomplex-p@ssw0rd", 
-        request: req 
+        request: req // REQUIRED
     });
     if (cookie.error) {
         return res.send(cookie.status);
