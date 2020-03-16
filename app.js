@@ -8,19 +8,18 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 
 
-
 //---------------- TOKEN Handling -----------------------
 
 
 // Save a Signed Token to the Header
 
 app.post('/savetoken', (req, res) => {
-    const { name, admin, password } = req.body;
-    const token = tokie.set({
-        type: "token",
+    const { name, admin } = req.body;
+    const token = tokie.setToken({
         data: { name, admin },
-        secretKey: password,
-        expiresIn: "5m"
+        secretKey: "TokenComplexP@ssw0rd",
+        expiresIn: "5m",
+        response: res
     });
     if (token.error) {
         return res.send(token.status);
@@ -32,12 +31,11 @@ app.post('/savetoken', (req, res) => {
 // Read a Signed Token from Header
 
 app.get('/readtoken', (req, res) => {
-    const { pass, apikey } = req.query;
-    const token = tokie.get({
-        type: "token",
-        secretKey: pass,
-        tokenKey: apikey
-        //request: req 
+    const { apikey } = req.query;
+    const token = tokie.getToken({
+        secretKey: "TokenComplexP@ssw0rd",
+        //tokenKey: apikey
+        request: req 
     });
     if (token.error) {
         return res.send(token.status);
@@ -47,45 +45,6 @@ app.get('/readtoken', (req, res) => {
 });
 
 
-
-
-//---------------- COOKIE handling -----
-
-
-
-// Save a Cookie
-
-app.post('/savecookie', (req, res) => {
-    const cookie = tokie.set({
-        type: "cookie",
-        name: "supercookie",
-        data: { name: "joe", admin: "yes" },
-        secretKey: "Cookiecomplex-p@ssw0rd",
-        expiresIn: "5m",
-        response: res
-    });
-    if (cookie.error) {
-        return res.send(cookie.status);
-    }
-    res.send(cookie.value)
-
-});
-
-
-// Read a Cookie
-
-app.get('/readcookie', (req, res) => {
-    const cookie = tokie.get({
-        type: "cookie",
-        name: "supercookie",
-        secretKey: "Cookiecomplex-p@ssw0rd",
-        request: req
-    });
-    if (cookie.error) {
-        return res.send(cookie.status);
-    }
-    return res.send(cookie.value);
-});
 
 
 

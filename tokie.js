@@ -88,54 +88,39 @@ function errorLog(err) {
 
 function testPass(secret){
     if(typeof secret!="string"){
-        return "missing"
+        return "Missing"
     }
     if(secret.length<10){
-        return "weak";
+        return "Weak";
     }
     let password = new Set([...secret.split("")]);
     if([...password].length < 5) {
-        return "weak"
+        return "Weak"
     }
     return "strong";
 }
 
 
-function set({ type = "cookie", name = null, data, secretKey, expiresIn = "30m", response = null }) {
+function setToken({name = null, data, secretKey, expiresIn = "30m", response = null }) {
 
-    if (type !== "token" && type !== "cookie") {
-        return errorLog("Tokie: 'type' parameter must be 'cookie' or 'token'");
+    let testPswd = testPass(secretKey);
+    if(testPswd !== "strong"){
+        return errorLog(`Tokie: ${testPswd} 'secretKey'`);
     }
 
-    if(testPass(secretKey) !== "strong"){
-        return errorLog("Tokie: Weak 'secretKey'");
-    }
-
-    if (type == "cookie") {
-        if (name == null) {
-            return errorLog("Tokie: 'name' parameter expected");
-        }
-
-        if (typeof name != "string") {
-            return errorLog("Tokie: Cookie name must be a valid string");
-        }
-        if ((/^[a-z0-9_]{1,20}$/i).test(name) === false) {
-            return errorLog("Tokie: 'name' must be Aphanumberic (max length 20)");
-        }
-
-    }
+    let maxAge = 0;
     if ((/^[0-9]{1,3}[smhd]{1}$/).test(expiresIn)) {
         let lastStr = expiresIn.slice(expiresIn.length - 1);
         let expireNum = Number(expiresIn.slice(0, expiresIn.length - 1));
-        var maxCookieAge = 0;
-        if (lastStr == "s") { maxCookieAge = 1000 * expireNum }
-        if (lastStr == "m") { maxCookieAge = 1000 * expireNum * 60 }
-        if (lastStr == "h") { maxCookieAge = 1000 * expireNum * 3600 }
-        if (lastStr == "d") { maxCookieAge = 1000 * expireNum * 3600 * 24 }
+        
+        if (lastStr == "s") { maxAge = 1000 * expireNum }
+        if (lastStr == "m") { maxAge = 1000 * expireNum * 60 }
+        if (lastStr == "h") { maxAge = 1000 * expireNum * 3600 }
+        if (lastStr == "d") { maxAge = 1000 * expireNum * 3600 * 24 }
     } else {
         return errorLog("Tokie: Invalid 'expiresIn' parameter");
     }
-    let setExpiry = Date.now() + maxCookieAge;
+    let setExpiry = Date.now() + maxAge;
     let hashed = hashTokie(data, setExpiry, SHA256(secretKey).toString());
     let encodedData = encodeData(data, SHA256(secretKey).toString());
     let encodeHashed = {
@@ -144,15 +129,12 @@ function set({ type = "cookie", name = null, data, secretKey, expiresIn = "30m",
         expire: setExpiry
     };
     let enc_data = Buffer.from(JSON.stringify(encodeHashed)).toString('base64');
-    if (response != null) {        
-        if (type == "token") {
-            response.set('Access-Control-Allow-Headers', 'Authorization');
-            response.set('Access-Control-Request-Headers', 'Authorization');
-            response.set('Access-Control-Expose-Headers', 'Authorization');
-            response.header("Authorization", `Bearer ${enc_data}`);
-        } else {
-            response.cookie(name, enc_data, { maxAge: maxCookieAge, httpOnly: true });
-        }
+    if (response != null) {
+        response.set('Access-Control-Allow-Headers', 'Authorization');
+        response.set('Access-Control-Request-Headers', 'Authorization');
+        response.set('Access-Control-Expose-Headers', 'Authorization');
+        response.header("Authorization", `Bearer ${enc_data}`);
+         
     } 
     return {
         error: false,
@@ -164,44 +146,18 @@ function set({ type = "cookie", name = null, data, secretKey, expiresIn = "30m",
 
 
 
-function get({ type = "cookie", name = null, secretKey, tokenKey=null, request = null }) {
+function getToken({ name = null, secretKey, tokenKey=null, request = null }) {
 
-    if (type !== "token" && type !== "cookie") {
-        return errorLog("Tokie: 'type' parameter must be 'cookie' or 'token'");
-    }
-    
     let encoded_data = null;
-    if (type == "cookie") {
-        if (name == null) {
-            return errorLog("Tokie: Cookie 'name' parameter expected");
+    if(typeof tokenKey == "string"){
+        encoded_data = tokenKey;
+    }else{
+        try {            
+            let authHeader = request.headers["authorization"];
+            encoded_data = authHeader.split("Bearer ")[1];
+        } catch(e) {
+            return errorLog("Tokie: Unable to find Token")
         }
-
-        if (typeof name != "string") {
-            return errorLog("Tokie: Cookie 'name' must be a valid string");
-        }
-
-        if ((/^[a-z0-9_]{1,20}$/i).test(name) === false) {
-            return errorLog("Tokie: 'name' must be Aphanumberic (max length 20)");
-        }
-
-        encoded_data = request.cookies[name];
-        if (typeof encoded_data == "undefined") {
-            return errorLog("Tokie: Cookie not found");
-        }
-
-    } else {
-        
-        if(typeof tokenKey == "string"){
-            encoded_data = tokenKey;
-        }else{
-            try {            
-                let authHeader = request.headers["authorization"];
-                encoded_data = authHeader.split("Bearer ")[1];
-            } catch(e) {
-                return errorLog("Tokie: Unable to find Token")
-            }
-        }
-
     }
 
     let decoded = tokieDecoder(encoded_data, SHA256(secretKey).toString());
@@ -222,5 +178,5 @@ function get({ type = "cookie", name = null, secretKey, tokenKey=null, request =
 
 
 module.exports = {
-    tokie: { set, get }
+    tokie: { setToken, getToken }
 }

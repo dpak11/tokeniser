@@ -1,13 +1,13 @@
 # Tokie
 
-`Tokie` lets you securely share data in form of a `token` or a `cookie` between server(NodeJS) and client, and between different parties in a compact, secure manner. To ensure integrity, a unique `signature`(digest) is created using a `secretKey` and attached along with `obfuscated` token(and cookie). Tokie uses `SHA256`
+`Tokie` lets you securely share data in form of a `token` between server(NodeJS) and client, and between different parties in a compact, secure manner. To ensure integrity, a unique `signature`(digest) is created using a `secretKey` and attached along with `obfuscated` data inside the token. Tokie uses `SHA256`
 
 
 
 ### Tokie format
 
-Below is a sample Tokie output containing your actual `data` in encoded form, and the signature stored in `sign`.
-This is further encoded to be used as `API key`(token).
+Below is Tokie output containing your actual `data` in encoded form, and the signature stored in `sign`.
+This will be further encoded when used as `API key`(token).
 
 ```
 {
@@ -26,66 +26,77 @@ This is further encoded to be used as `API key`(token).
 
 ### Storing data into a `token`: 
 
-`tokie.set()` will create a unique token using your `data` and `secretKey`. This token gets attached to `Authorisation Header` (if only specified). 
+`tokie.setToken()` will create a unique `token` using your `data` and `secretKey`. 
 
-`response` parameter is `OPTIONAL`. 
+If `response` parameter is included, then the `token` gets automatically attached to the `response header`. 
 
-If `response` is included, then the `token` gets automatically attached to the `response header`. 
+> `Authorisation Bearer {token}` 
 
-`Authorisation Bearer {token}`  
-
-If not included, then `tokie.set({...})` will only return back the encoded (and signed) data. You can then trasmit/share this encoded data to client side in whichever way you prefer. 
+If `response` is not included, then `tokie.set()` will simply return back the encoded (and signed) data.
 
 `expiresIn` is the expiry period of the token. 
 
-Example:
+Here is an example of some valid values for `expiresIn`:
 
-20s => 20 seconds,
-3m => 3 minutes,
-6h => 6 hours,
-5d => 5 days
-
+```
+20s (20 seconds),
+3m (3 minutes),
+6h (6 hours),
+5d (5 days)
+```
 
 
 ```js
-    tokie.set({
-        type: "token",
+    tokie.setToken({
         data: { name: "joe", admin: "yes" },
         secretKey: "token-complex-p@ssw0rd",
-        expiresIn: "5m", // 5 minutes
+        expiresIn: "5m", 
         response: res // optional
     });
 
 ```
 
 
+### Reading data from a `token`:
 
+There are 2 ways to read a `token`. 
 
-### Storing data into a `cookie`:
+1. `tokie.getToken({tokenKey})` will read data from the `token` that is embedded in query string parameter as API key(token key).
 
-Now in case of a `cookie`, the `name` parameter is `REQUIRED`, unlike in `token`.
+To read data from query string (API key), `tokenKey` parameter is `REQUIRED`.
 
-`response` parameter is `OPTIONAL`. 
+`request` parameter is `NOT REQUIRED`.
 
-If `response` is included, then the `cookie` gets automatically attached to the `response header`. If not included, then `tokie.set({...})` will only return back the encoded data. 
 
 ```js
-tokie.set({
-    type: "cookie",
-    name: "supercookie",
-    data: {name:"tom", role:"admin"},
-    secretKey: "Cookiecomplex-p@ssw0rd",
-    expiresIn: "5m",
-    response: res // optional
-});
+    const token = tokie.getToken({
+        secretKey: "some-Complex-Password",
+        tokenKey: TOKEN_KEY // REQUIRED
+    });
+
 ```
 
+
+2. `tokie.getToken({response})` will read data from the `token` that is embedded in `Authorisation Header`.
+
+`request` parameter is `REQUIRED` in this case.
+
+`tokenKey` parameter is `NOT REQUIRED`.
+
+
+```js
+    const token = tokie.getToken({
+        secretKey: "some-Complex-Password",
+        request: req // REQUIRED
+    });
+
+```
 
 
 
 ## Token Usage (app.js)
 
-1) **Create a Signed Token and return the token, but do not attach it to Authorisation Header**
+1. **Create a Signed Token and return the token, but do not attach it to Authorisation Header**
 
 ```js
 
@@ -102,12 +113,11 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Create a Signed Token and return the token, but do not attach it to Authorisation Header
 
 app.post('/createtoken', (req, res) => {
-    const { name, admin, password } = req.body;
-    const token = tokie.set({
-        type: "token",
+    const { name, admin } = req.body;
+    const token = tokie.setToken({
         data: { name, admin },
-        secretKey: password,
-        expiresIn: "5m"
+        secretKey: "some-long-password",
+        expiresIn: "15m" // token expire in 15 mins
     });
     if (token.error) {
         return res.send(token.status);
@@ -119,15 +129,17 @@ app.post('/createtoken', (req, res) => {
 ```
 
 
-2) **Create a Signed Token and return the token, and also attach it to Authorisation Header**
+2. **Create a Signed Token, attach it to Authorisation Header and return back the token**
+
+Here the signed token is attached in the response header. Please note the addition of `response` parameter.
+
 
 ```js
 app.post('/createtoken_header', (req, res) => {
-    const { name, admin, password } = req.body;
-    const token = tokie.set({
-        type: "token",
+    const { name, admin } = req.body;
+    const token = tokie.setToken({
         data: { name, admin },
-        secretKey: password,
+        secretKey: "some-long-password",
         expiresIn: "5m",
         response: res // This is required for inserting token into Header
     });
@@ -140,25 +152,25 @@ app.post('/createtoken_header', (req, res) => {
 
 ```
 
-3) **Read a Signed Token from Query Parameter:**
+3. **Read a Signed Token from Query Parameter:**
 
-If you already have a signed token, you can transmit this token as query parameter. Below, `my_token` contains your signed token.
+`tokie.getToken()` is used to read a token value.
+
+If you already have a signed token, you can transmit the token via query parameter. Below example, `my_token` contains your signed token.
+
+> http://localhost:3000/read_token_query?my_token=eyJkYXRhIjoiYkY5c1gxZGZSVjkyjdkfrye8rfs
 
 `tokenKey` parameter is `REQUIRED`.
 
 `request` parameter is `NOT required`. 
-
-
-`http://localhost:3000/read_token_query?my_token=eyJkYXRhIjoiYkY5c1gxZGZSVjkyjdkfrye8rfs`
  
 
 ```js
 app.get('/read_token_query', (req, res) => {
     const TOKEN_KEY = req.query.my_token;
-    const token = tokie.get({
-        type: "token",
+    const token = tokie.getToken({
         secretKey: "some-Complex-Password",
-        tokenKey: TOKEN_KEY
+        tokenKey: TOKEN_KEY // REQUIRED
     });
     if (token.error) {
         return res.send(token.status);
@@ -170,9 +182,9 @@ app.get('/read_token_query', (req, res) => {
 ````
 
 
-4) **Read a Signed Token from Authorisation Header:**
+4. **Read a Signed Token from Authorisation Header:**
 
-If you choose to transmit signed token via Header, you MUST include the `request` parameter.
+If you want to read signed token from Header, you MUST include the `request` parameter.
 (`tokenKey` parameter is not required in this case)
 
 
@@ -194,65 +206,3 @@ app.get('/read_token_header', (req, res) => {
 
 ```
 
-
-
-
-
-
-## Cookie Usage (app.js)
-
-1) **Save a cookie to Header:**
-
-When saving a `cookie`, you need to specify the `name` of the cookie. Though `response` parameter is optional, in most use cases you MUST include it in case of a cookie.
-
-```js
-const express = require('express');
-const bodyParser = require('body-parser');
-const { tokie } = require('./tokie');
-const app = express();
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-
-
-app.post('/savecookie', (req, res) => {
-    const cookie = tokie.set({
-        type: "cookie", 
-        name: "supercookie", 
-        data: { name: "joe", admin: "yes" }, 
-        secretKey: "Cookiecomplex-p@ssw0rd", 
-        expiresIn: "5m", 
-        response: res 
-    });
-    if (cookie.error) {
-        return res.send(cookie.status);
-    }
-    res.send(cookie.value)
-
-});
-```
-
-
-
-2) **Read a Cookie:**
-
-Always include `request` parameter for reading a cookie.
-
-```js
-// Read a Cookie
-
-app.get('/readcookie', (req, res) => {
-    const cookie = tokie.get({
-        type: "cookie", 
-        name: "supercookie", 
-        secretKey: "Cookiecomplex-p@ssw0rd", 
-        request: req // REQUIRED
-    });
-    if (cookie.error) {
-        return res.send(cookie.status);
-    }
-    return res.send(cookie.value);
-});
-
-
-
-```
