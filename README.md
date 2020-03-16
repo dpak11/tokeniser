@@ -85,7 +85,7 @@ tokie.set({
 
 ## Token Usage (app.js)
 
-1) Create a Signed Token and return the token, but do not attach it to Authorisation Header
+1) **Create a Signed Token and return the token, but do not attach it to Authorisation Header**
 
 ```js
 
@@ -119,7 +119,7 @@ app.post('/createtoken', (req, res) => {
 ```
 
 
-2) Create a Signed Token and return the token, and also attach it to Authorisation Header
+2) **Create a Signed Token and return the token, and also attach it to Authorisation Header**
 
 ```js
 app.post('/createtoken_header', (req, res) => {
@@ -140,9 +140,14 @@ app.post('/createtoken_header', (req, res) => {
 
 ```
 
-3) Read a Signed Token from Query Parameter:
+3) **Read a Signed Token from Query Parameter:**
 
-After you have created a signed token, you can then transmit this token as query parameter in the URL. Below, `my_token` contains your signed token. Here `request` parameter 
+If you already have a signed token, you can transmit this token as query parameter. Below, `my_token` contains your signed token.
+
+`tokenKey` parameter is `REQUIRED`.
+
+`request` parameter is `NOT required`. 
+
 
 `http://localhost:3000/read_token_query?my_token=eyJkYXRhIjoiYkY5c1gxZGZSVjkyjdkfrye8rfs`
  
@@ -165,9 +170,9 @@ app.get('/read_token_query', (req, res) => {
 ````
 
 
-4) Read a Signed Token from Authorisation Header:
+4) **Read a Signed Token from Authorisation Header:**
 
-If you choose to transmit signed token through the Header, you MUST include the `request` parameter.
+If you choose to transmit signed token via Header, you MUST include the `request` parameter.
 (`tokenKey` parameter is not required in this case)
 
 
@@ -196,7 +201,7 @@ app.get('/read_token_header', (req, res) => {
 
 ## Cookie Usage (app.js)
 
-1) Save a cookie to Header:
+1) **Save a cookie to Header:**
 
 When saving a `cookie`, you need to specify the `name` of the cookie. Though `response` parameter is optional, in most use cases you MUST include it in case of a cookie.
 
@@ -228,7 +233,7 @@ app.post('/savecookie', (req, res) => {
 
 
 
-2) Read a Cookie:
+2) **Read a Cookie:**
 
 Always include `request` parameter for reading a cookie.
 
