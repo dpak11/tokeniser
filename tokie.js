@@ -28,9 +28,7 @@ function tokieDecoder(encdata, hKey) {
     }
 
     try {
-        if(!obj.sign || !obj.expire){
-            return false;
-        }
+        
         if(typeof obj.sign == "undefined" || typeof obj.expire == "undefined"){
             return false;
         }

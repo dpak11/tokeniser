@@ -61,9 +61,9 @@ Here is an example of some valid values for `expiresIn`:
 
 There are 2 ways to read a `token`. 
 
-1. `tokie.getToken({tokenKey})` will read data from the `token` that is embedded in query string parameter as API key(token key).
+1. `tokie.getToken({tokenKey})` will read data from the `token` that is part of a query string parameter (API key/token key).
 
-To read data from query string (API key), `tokenKey` parameter is `REQUIRED`.
+`tokenKey` parameter is `REQUIRED`.
 
 `request` parameter is `NOT REQUIRED`.
 
@@ -158,7 +158,7 @@ app.post('/createtoken_header', (req, res) => {
 
 If you already have a signed token, you can transmit the token via query parameter. Below example, `my_token` contains your signed token.
 
-> http://localhost:3000/read_token_query?my_token=eyJkYXRhIjoiYkY5c1gxZGZSVjkyjdkfrye8rfs
+`http://localhost:3000/read_token_query?my_token=eyJkYXRhIjoiYkY5c1gxZGZSVjkyjdkfrye8rfs`
 
 `tokenKey` parameter is `REQUIRED`.
 
@@ -185,12 +185,12 @@ app.get('/read_token_query', (req, res) => {
 4. **Read a Signed Token from Authorisation Header:**
 
 If you want to read signed token from Header, you MUST include the `request` parameter.
-(`tokenKey` parameter is not required in this case)
+(`tokenKey` parameter is NOT required in this case)
 
 
 ```js
 app.get('/read_token_header', (req, res) => {    
-    const token = tokie.get({
+    const token = tokie.getToken({
         type: "token", 
         secretKey: "some-Complex-Password", 
         request: req // This is REQUIRED for reading token from Header
