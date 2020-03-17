@@ -30,9 +30,9 @@ This will be further encoded when used as `API key`(token).
 
 If `response` parameter is included, then the `token` gets automatically attached to the `response header`. 
 
-> `Authorisation Bearer {token}` 
+> `Authorization Bearer {token}` 
 
-If `response` is not included, then `tokie.set()` will simply return back the encoded (and signed) data.
+If `response` is not included, then `tokie.setToken()` will simply return back the encoded (and signed) data.
 
 `expiresIn` is the expiry period of the token. 
 
@@ -77,7 +77,7 @@ There are 2 ways to read a `token`.
 ```
 
 
-2. `tokie.getToken({response})` will read data from the `token` that is embedded in `Authorisation Header`.
+2. `tokie.getToken({request})` will read data from the `token` that is embedded in `Authorization Header`.
 
 `request` parameter is `REQUIRED` in this case.
 
@@ -96,7 +96,7 @@ There are 2 ways to read a `token`.
 
 ## Token Usage (app.js)
 
-1. **Create a Signed Token and return the token, but do not attach it to Authorisation Header**
+1. **Create a Signed Token and return the token, but do not attach it to Header**
 
 ```js
 
@@ -110,7 +110,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 
 
-// Create a Signed Token and return the token, but do not attach it to Authorisation Header
+// Create a Signed Token and return the token, but do not attach it to Header
 
 app.post('/createtoken', (req, res) => {
     const { name, admin } = req.body;
@@ -129,7 +129,7 @@ app.post('/createtoken', (req, res) => {
 ```
 
 
-2. **Create a Signed Token, attach it to Authorisation Header and return back the token**
+2. **Create a Signed Token, attach it to Authorization Header and return back the token**
 
 Here the signed token is attached in the response header. Please note the addition of `response` parameter.
 
@@ -182,7 +182,7 @@ app.get('/read_token_query', (req, res) => {
 ````
 
 
-4. **Read a Signed Token from Authorisation Header:**
+4. **Read a Signed Token from Authorization Header:**
 
 If you want to read signed token from Header, you MUST include the `request` parameter.
 (`tokenKey` parameter is NOT required in this case)

@@ -3,6 +3,8 @@ const bodyParser = require('body-parser');
 const { tokie } = require('./tokie');
 const app = express();
 
+
+app.use(express.static(__dirname + "/examples"));
 app.use(bodyParser.json({ limit: '5mb' }));
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -13,34 +15,62 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // Save a Signed Token to the Header
 
-app.post('/savetoken', (req, res) => {
-    const { name, admin } = req.body;
+app.post('/create_tokenapi', (req, res) => {
+    const { name, pass, descr, expiry } = req.body;
     const token = tokie.setToken({
-        data: { name, admin },
-        secretKey: "TokenComplexP@ssw0rd",
-        expiresIn: "5m",
-        response: res
+        data: { name, descr },
+        secretKey: pass,
+        expiresIn: expiry
     });
     if (token.error) {
-        return res.send(token.status);
+        return res.json({error:token.status, token:null})
     }
-    res.send(token.value)
+    res.json({token:token.value})
 
 });
 
 // Read a Signed Token from Header
 
-app.get('/readtoken', (req, res) => {
-    const { apikey } = req.query;
+app.post('/read_tokenapi', (req, res) => {
+    
+    const apikey = req.query.token;
+    const passwd = req.body.pass;
     const token = tokie.getToken({
-        secretKey: "TokenComplexP@ssw0rd",
-        //tokenKey: apikey
-        request: req 
+        secretKey: passwd,
+        tokenKey: apikey
     });
     if (token.error) {
-        return res.send(token.status);
+        return res.json({error:token.status, token:null})
     }
-    res.send(token.value)
+    res.send({token:token.value})
+
+});
+
+app.post('/create_headertoken', (req, res) => {
+    const { name, pass, descr, expiry } = req.body;
+    const token = tokie.setToken({
+        data: { name, descr },
+        secretKey: pass,
+        expiresIn: expiry,
+        response: res
+    });
+    if (token.error) {
+        return res.json({error:token.status, token:null})
+    }
+    res.json({token:token.value})
+
+});
+
+app.post('/read_headertoken', (req, res) => {
+    const passwd = req.body.pass;
+    const token = tokie.getToken({
+        secretKey: passwd,
+        request: req
+    });
+    if (token.error) {
+        return res.json({error:token.status, token:null})
+    }
+    res.send({token:token.value})
 
 });
 
@@ -48,10 +78,23 @@ app.get('/readtoken', (req, res) => {
 
 
 
-app.get('/home', (req, res) => {
-    res.sendFile(__dirname + "/index.html")
+app.get('/example1_create', (req, res) => {
+    res.sendFile(__dirname + "/examples/example1.html")
 });
 
+
+app.get('/example1_read', (req, res) => {
+    res.sendFile(__dirname + "/examples/example1-read.html")
+});
+
+
+app.get('/example2_create', (req, res) => {
+    res.sendFile(__dirname + "/examples/example2.html")
+});
+
+app.get('/example2_read', (req, res) => {
+    res.sendFile(__dirname + "/examples/example2-read.html")
+});
 
 
 //server listens to port 3000 
