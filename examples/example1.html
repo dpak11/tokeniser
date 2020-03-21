@@ -19,6 +19,8 @@
             width: 500px;
             overflow: scroll;
             height: 150px;
+            background-color: #d7d0d0;
+            padding: 10px;
         }
         .hide{
             display: none
@@ -57,7 +59,7 @@
             .then(response => {
                 if(response.token){
                     const tokenLink = `http://localhost:3000/example1_read?token=${response.token}`;
-                    queryDiv.textContent = tokenLink;
+                    queryDiv.innerText = `Token in Query Parameter:\n\n ${tokenLink}`;
                     anchor.setAttribute("href", tokenLink)
                     queryDiv.classList.remove("hide");
                     anchor.classList.remove("hide");

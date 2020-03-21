@@ -19,14 +19,16 @@
             width: 500px;
             overflow: scroll;
             height: 150px;
+            background-color: #d7d0d0;
+            padding: 10px;
         }
 
     </style>
 </head>
 
 <body>
-    <h2>Example 2: Get the Token from LocalStorage and send it to Server via Header. </h2>
-    <h3>If token and password are valid, then server will send back data</h3>
+    <h2>Example 2: From Session Storage, attach the token to Authorization Header and send to Server </h2>
+    <h3>Server validates token and password, then server sends back data from the token</h3>
     <form>
         <span><input type="text" id="pass" placeholder="Enter correct password"></span>
         <span><input type="submit" value="Submit"></span>
@@ -42,7 +44,7 @@
     const form = document.querySelector("form");
     const queryDiv = document.querySelector("div");
     const anchor = document.querySelector("#readlink");
-    const token = localStorage.getItem("tokie_example2");
+    const token = sessionStorage.getItem("tokie_example2");
     if (token) {
         form.addEventListener("submit", (e) => {
             e.preventDefault();
@@ -58,7 +60,7 @@
                 .then(response => {
                     if (response.token) {
                         queryDiv.innerText = `Your Data:\n ${JSON.stringify(response.token)}
-                                \n Your Header Token:\n ${token}
+                                \n Header Token:\n Authorization Bearer ${token}
                             `;
                     } else {
                         queryDiv.textContent = `${response.error}`;

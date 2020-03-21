@@ -19,6 +19,11 @@
             width: 500px;
             overflow: scroll;
             height: 150px;
+            background-color: #d7d0d0;
+            padding: 10px;
+        }
+        .hide{
+            display: none
         }
 
     </style>
@@ -30,7 +35,7 @@
         <span><input type="text" id="pass" placeholder="Enter correct password"></span>
         <span><input type="submit" value="Submit"></span>
     </form>
-    <div>
+    <div class="hide">
     </div>
     <p><a id="readlink" href="/example1_create">Click here to go back</a></p>
     <p>&nbsp;</p>
@@ -56,6 +61,7 @@
                     else{
                         queryDiv.textContent = `${response.error}`;
                     }
+                    queryDiv.classList.remove("hide")
                     
                 });
         });

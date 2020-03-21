@@ -52,7 +52,7 @@ app.post('/create_headertoken', (req, res) => {
         data: { name, descr },
         secretKey: pass,
         expiresIn: expiry,
-        response: res
+        //response: res
     });
     if (token.error) {
         return res.json({error:token.status, token:null})

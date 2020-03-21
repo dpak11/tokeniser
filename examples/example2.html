@@ -18,7 +18,9 @@
         div{
             width: 500px;
             overflow: scroll;
-            height: 75px;
+            height: 150px;
+            background-color: #d7d0d0;
+            padding: 10px;
         }
         .hide{
             display: none
@@ -38,11 +40,11 @@
     </form>
     <div class="hide">
     </div>
-    <p><a class="hide" id="readlink" href="/example2_read">Click here to read token from localStorage</a></p>
+    <p><a class="hide" id="readlink" href="/example2_read">Now attach the saved token to Authorization Header and send to Server</a></p>
     <p>&nbsp;</p>
     <p>&nbsp;</p>
     <hr>
-    <p><a href="/example2_create">Go to Example 1: Create data token and get token as query parameter</a></p>
+    <p><a href="/example1_create">Go to Example 1: Create data token and get token as query parameter</a></p>
     <script>
     const form = document.querySelector("form");
     const queryDiv = document.querySelector("div");
@@ -56,12 +58,12 @@
             .then(data => data.json())
             .then(response => {
                 if(response.token){                    
-                    queryDiv.innerText = `Received below Token from Server. Token saved to your localStorage.\n
-                    Authorization Bearer ${response.token}
+                    queryDiv.innerText = `Received below Token from Server and saved to your Session Storage.\n
+                    ${response.token}
                     `;
                     queryDiv.classList.remove("hide");
                     anchor.classList.remove("hide");
-                    localStorage.setItem("tokie_example2",response.token)
+                    sessionStorage.setItem("tokie_example2",response.token)
                 }else{
                     queryDiv.textContent = response.error;
                     queryDiv.classList.remove("hide");
