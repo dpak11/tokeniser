@@ -1,13 +1,13 @@
 # Tokie
 
-`Tokie` lets you securely share data in form of a `token` between server(NodeJS) and client, and between different parties in a compact, secure manner. To ensure integrity, a unique `signature`(digest) is created using a `secretKey` and attached along with `obfuscated` data inside the token. Tokie uses `SHA256`
+`Tokie` lets you securely share data in form of a `token` between server(NodeJS) and client, and between different parties in a compact, secure manner. To ensure integrity, a unique `signature`(digest) is generated using a `secretKey` and the data. Tokie uses `SHA256`
 
 
 
 ### Tokie format
 
-Below is Tokie output containing your actual `data` in encoded form, and the signature stored in `sign`.
-This will be further encoded when used as `API key`(token).
+Here is a sample Tokie output containing your encrypted `data`, token expiration limit and the `signature`.
+This will be base64 encoded to used as a token.
 
 ```
 {
@@ -28,22 +28,9 @@ This will be further encoded when used as `API key`(token).
 
 `tokie.setToken()` will create a unique `token` using your `data` and `secretKey`. 
 
-If `response` parameter is included, then the `token` gets automatically attached to the `response header`. 
+`response` parameter is `optional`. If this parameter is included, then the `token` gets automatically attached to the `response header`. 
 
 > `Authorization Bearer {token}` 
-
-If `response` is not included, then `tokie.setToken()` will simply return back the encoded (and signed) data.
-
-`expiresIn` is the expiry period of the token. 
-
-Here is an example of some valid values for `expiresIn`:
-
-```
-20s (20 seconds),
-3m (3 minutes),
-6h (6 hours),
-5d (5 days)
-```
 
 
 ```js
@@ -56,12 +43,27 @@ Here is an example of some valid values for `expiresIn`:
 
 ```
 
+If `response` is not included, then `tokie.setToken()` will simply return back the encoded token.
+
+`expiresIn` parameter is the expiry period of the token. This parameter is `required`
+
+A valid `expiresIn` value has the below format:
+
+```
+20s (20 seconds),
+3m (3 minutes),
+6h (6 hours),
+5d (5 days)
+```
+
+
+
 
 ### Reading data from a `token`:
 
 There are 2 ways to read a `token`. 
 
-1. `tokie.getToken({tokenKey})` will read data from the `token` that is part of a query string parameter (API key/token key).
+1. `tokie.getToken({tokenKey})` will read data from the `token` that is part of a query string parameter (token key).
 
 `tokenKey` parameter is `REQUIRED`.
 
@@ -79,7 +81,7 @@ There are 2 ways to read a `token`.
 
 2. `tokie.getToken({request})` will read data from the `token` that is embedded in `Authorization Header`.
 
-`request` parameter is `REQUIRED` in this case.
+In this case, `request` parameter is `REQUIRED`.
 
 `tokenKey` parameter is `NOT REQUIRED`.
 
@@ -131,7 +133,7 @@ app.post('/createtoken', (req, res) => {
 
 2. **Create a Signed Token, attach it to Authorization Header and return back the token**
 
-Here the signed token is attached in the response header. Please note the addition of `response` parameter.
+Here the signed token gets attached in the response header because of the addition of `response` parameter.
 
 
 ```js
