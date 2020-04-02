@@ -99,7 +99,7 @@ function testPass(secret){
 }
 
 
-function setToken({name = null, data, secretKey, expiresIn = "30m", response = null }) {
+function create({name = null, data, secretKey, expiresIn = "30m", response = null }) {
 
     let testPswd = testPass(secretKey);
     if(testPswd !== "strong"){
@@ -144,7 +144,7 @@ function setToken({name = null, data, secretKey, expiresIn = "30m", response = n
 
 
 
-function getToken({ name = null, secretKey, tokenKey=null, request = null }) {
+function read({ name = null, secretKey, tokenKey=null, request = null }) {
 
     let encoded_data = null;
     if(typeof tokenKey == "string"){
@@ -176,5 +176,5 @@ function getToken({ name = null, secretKey, tokenKey=null, request = null }) {
 
 
 module.exports = {
-    tokie: { setToken, getToken }
+    tokie: { create, read }
 }

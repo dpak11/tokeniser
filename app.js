@@ -17,7 +17,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.post('/create_tokenapi', (req, res) => {
     const { name, pass, descr, expiry } = req.body;
-    const token = tokie.setToken({
+    const token = tokie.create({
         data: { name, descr },
         secretKey: pass,
         expiresIn: expiry
@@ -35,7 +35,7 @@ app.post('/read_tokenapi', (req, res) => {
     
     const apikey = req.query.token;
     const passwd = req.body.pass;
-    const token = tokie.getToken({
+    const token = tokie.read({
         secretKey: passwd,
         tokenKey: apikey
     });
@@ -48,7 +48,7 @@ app.post('/read_tokenapi', (req, res) => {
 
 app.post('/create_headertoken', (req, res) => {
     const { name, pass, descr, expiry } = req.body;
-    const token = tokie.setToken({
+    const token = tokie.create({
         data: { name, descr },
         secretKey: pass,
         expiresIn: expiry,
@@ -63,7 +63,7 @@ app.post('/create_headertoken', (req, res) => {
 
 app.post('/read_headertoken', (req, res) => {
     const passwd = req.body.pass;
-    const token = tokie.getToken({
+    const token = tokie.read({
         secretKey: passwd,
         request: req
     });

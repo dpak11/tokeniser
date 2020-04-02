@@ -26,7 +26,7 @@ This will be base64 encoded to used as a token.
 
 ### Storing data into a `token`: 
 
-`tokie.setToken()` will create a unique `token` using your `data` and `secretKey`. 
+`tokie.create()` will create a unique `token` using your `data` and `secretKey`. 
 
 `response` parameter is `optional`. If this parameter is included, then the `token` gets automatically attached to the `response header`. 
 
@@ -34,7 +34,7 @@ This will be base64 encoded to used as a token.
 
 
 ```js
-    tokie.setToken({
+    tokie.create({
         data: { name: "joe", admin: "yes" },
         secretKey: "token-complex-p@ssw0rd",
         expiresIn: "5m", 
@@ -43,7 +43,7 @@ This will be base64 encoded to used as a token.
 
 ```
 
-If `response` is not included, then `tokie.setToken()` will simply return back the encoded token.
+If `response` is not included, then `tokie.create()` will simply return back the encoded token.
 
 `expiresIn` parameter is the expiry period of the token. This parameter is `required`
 
@@ -63,7 +63,7 @@ A valid `expiresIn` value has the below format:
 
 There are 2 ways to read a `token`. 
 
-1. `tokie.getToken({tokenKey})` will read data from the `token` that is part of a query string parameter (token key).
+1. `tokie.read({tokenKey})` will read data from the `token` that is part of a query string parameter (token key).
 
 `tokenKey` parameter is `REQUIRED`.
 
@@ -71,7 +71,7 @@ There are 2 ways to read a `token`.
 
 
 ```js
-    const token = tokie.getToken({
+    const token = tokie.read({
         secretKey: "some-Complex-Password",
         tokenKey: TOKEN_KEY // REQUIRED
     });
@@ -79,7 +79,7 @@ There are 2 ways to read a `token`.
 ```
 
 
-2. `tokie.getToken({request})` will read data from the `token` that is embedded in `Authorization Header`.
+2. `tokie.read({request})` will read data from the `token` that is embedded in `Authorization Header`.
 
 In this case, `request` parameter is `REQUIRED`.
 
@@ -87,7 +87,7 @@ In this case, `request` parameter is `REQUIRED`.
 
 
 ```js
-    const token = tokie.getToken({
+    const token = tokie.read({
         secretKey: "some-Complex-Password",
         request: req // REQUIRED
     });
@@ -116,7 +116,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.post('/createtoken', (req, res) => {
     const { name, admin } = req.body;
-    const token = tokie.setToken({
+    const token = tokie.create({
         data: { name, admin },
         secretKey: "some-long-password",
         expiresIn: "15m" // token expire in 15 mins
@@ -139,7 +139,7 @@ Here the signed token gets attached in the response header because of the additi
 ```js
 app.post('/createtoken_header', (req, res) => {
     const { name, admin } = req.body;
-    const token = tokie.setToken({
+    const token = tokie.create({
         data: { name, admin },
         secretKey: "some-long-password",
         expiresIn: "5m",
@@ -156,7 +156,7 @@ app.post('/createtoken_header', (req, res) => {
 
 3. **Read a Signed Token from Query Parameter:**
 
-`tokie.getToken()` is used to read a token value.
+`tokie.read()` is used to read a token value.
 
 If you already have a signed token, you can transmit the token via query parameter. Below example, `my_token` contains your signed token.
 
@@ -170,7 +170,7 @@ If you already have a signed token, you can transmit the token via query paramet
 ```js
 app.get('/read_token_query', (req, res) => {
     const TOKEN_KEY = req.query.my_token;
-    const token = tokie.getToken({
+    const token = tokie.read({
         secretKey: "some-Complex-Password",
         tokenKey: TOKEN_KEY // REQUIRED
     });
@@ -192,7 +192,7 @@ If you want to read signed token from Header, you MUST include the `request` par
 
 ```js
 app.get('/read_token_header', (req, res) => {    
-    const token = tokie.getToken({
+    const token = tokie.read({
         type: "token", 
         secretKey: "some-Complex-Password", 
         request: req // This is REQUIRED for reading token from Header
