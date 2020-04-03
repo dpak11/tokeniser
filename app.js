@@ -96,6 +96,9 @@ app.get('/example2_read', (req, res) => {
     res.sendFile(__dirname + "/examples/example2-read.html")
 });
 
+app.get('/', (req,res) => {
+    res.redirect("/example1_create");
+});
 
 //server listens to port 3000 
 app.listen(3000, (err) => {
