@@ -44,7 +44,7 @@
     <p>&nbsp;</p>
     <p>&nbsp;</p>
     <hr>
-    <p><a href="/example2_create">Go to Example 2: Create data token and insert it to Authorization Header</a></p>
+    <p><a href="/example2_create_token">Go to Example 2: Create data token and insert it to Authorization Header</a></p>
     <script>
     const form = document.querySelector("form");
     const queryDiv = document.querySelector("div");
@@ -58,7 +58,7 @@
             .then(data => data.json())
             .then(response => {
                 if(response.token){
-                    const tokenLink = `http://localhost:3000/example1_read?token=${response.token}`;
+                    const tokenLink = `http://localhost:3000/example1_read_token?token=${response.token}`;
                     queryDiv.innerText = `Token in Query Parameter:\n\n ${tokenLink}`;
                     anchor.setAttribute("href", tokenLink)
                     queryDiv.classList.remove("hide");

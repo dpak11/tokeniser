@@ -99,7 +99,7 @@ function testPass(secret){
 }
 
 
-function create({name = null, data, secretKey, expiresIn = "30m", response = null }) {
+function create({data, secretKey, expiresIn = "30m", response = null }) {
 
     let testPswd = testPass(secretKey);
     if(testPswd !== "strong"){

@@ -78,26 +78,26 @@ app.post('/read_headertoken', (req, res) => {
 
 
 
-app.get('/example1_create', (req, res) => {
+app.get('/example1_create_token', (req, res) => {
     res.sendFile(__dirname + "/examples/example1.html")
 });
 
 
-app.get('/example1_read', (req, res) => {
+app.get('/example1_read_token', (req, res) => {
     res.sendFile(__dirname + "/examples/example1-read.html")
 });
 
 
-app.get('/example2_create', (req, res) => {
+app.get('/example2_create_token', (req, res) => {
     res.sendFile(__dirname + "/examples/example2.html")
 });
 
-app.get('/example2_read', (req, res) => {
+app.get('/example2_read_token', (req, res) => {
     res.sendFile(__dirname + "/examples/example2-read.html")
 });
 
 app.get('/', (req,res) => {
-    res.redirect("/example1_create");
+    res.redirect("/example1_create_token");
 });
 
 //server listens to port 3000 
