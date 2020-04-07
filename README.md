@@ -94,7 +94,7 @@ In this case, `request` parameter is `REQUIRED`.
 
 ```
 
-
+---
 
 ## Token Usage (app.js)
 
@@ -208,3 +208,17 @@ app.get('/read_token_header', (req, res) => {
 
 ```
 
+---
+
+
+## Example Pages:
+
+- To view demonstration examples, download or clone this repository to your local drive.
+
+- "Shift + Right click" inside the folder where you have package.json, and open Windows PowerShell or command window.
+
+- Execute `npm install`.
+
+- After the installation is complete, execute `npm start`.
+
+- Open your browser in `http://localhost:3000`
