@@ -14,7 +14,7 @@ function encodeData(data, hKey) {
     let alteredBase64 = [];
     base64Data.forEach((base) => {
         let index = uniqueSequence.reversed.indexOf(base);
-        alteredBase64.push(`${uniqueSequence.unique[index]}_`)
+        alteredBase64.push(`${uniqueSequence.unique[index]}`)
     });
     return Buffer.from(alteredBase64.join(""), 'binary').toString('base64')
 }
@@ -34,7 +34,7 @@ function tokieDecoder(encdata, hKey) {
         }
         let uniqueSequence = getUniqueKey(hKey);
         let _data = Buffer.from(obj.data, "base64").toString('ascii');
-        let d = _data.split("_");
+        let d = _data.split("");
         let altered = [];
         d.forEach((val) => {
             let index = uniqueSequence.unique.indexOf(val);
