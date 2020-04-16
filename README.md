@@ -6,8 +6,8 @@
 
 ### Tokie format
 
-Here is a sample Tokie output containing your encrypted `data`, token expiration limit and the `signature`.
-This will be base64 encoded to used as a token.
+Here is a sample Tokie output containing your encrypted `data`, token `expiration` limit and the `signature`.
+This will be base64 encoded and used as a token.
 
 ```
 {
@@ -36,7 +36,7 @@ This will be base64 encoded to used as a token.
 ```js
     tokie.create({
         data: { name: "joe", admin: "yes" },
-        secretKey: "token-complex-p@ssw0rd",
+        secretKey: "token-complex-p@ssw0rd", // In production phase, 'secretKey' should be stored on the server only
         expiresIn: "5m", 
         response: res // optional
     });
@@ -47,13 +47,15 @@ If `response` is not included, then `tokie.create()` will simply return back the
 
 `expiresIn` parameter is the expiry period of the token. This parameter is `required`
 
-A valid `expiresIn` value has the below format:
+Here are some valid `expiresIn` examples:
 
 ```
-20s (20 seconds),
-3m (3 minutes),
-6h (6 hours),
-5d (5 days)
+20s denotes 20 seconds,
+3m denotes 3 minutes,
+6h denotes 6 hours,
+5d denotes 5 days,
+
+and so on...
 ```
 
 
@@ -88,7 +90,7 @@ In this case, `request` parameter is `REQUIRED`.
 
 ```js
     const token = tokie.read({
-        secretKey: "some-Complex-Password",
+        secretKey: "some-Complex-Password", // In production phase, 'secretKey' should be stored on the server only
         request: req // REQUIRED
     });
 
@@ -118,8 +120,8 @@ app.post('/createtoken', (req, res) => {
     const { name, admin } = req.body;
     const token = tokie.create({
         data: { name, admin },
-        secretKey: "some-long-password",
-        expiresIn: "15m" // token expire in 15 mins
+        secretKey: "some-long-password", // In production phase, 'secretKey' should be stored on the server only
+        expiresIn: "15m" // token expires in 15 mins
     });
     if (token.error) {
         return res.send(token.status);
@@ -141,7 +143,7 @@ app.post('/createtoken_header', (req, res) => {
     const { name, admin } = req.body;
     const token = tokie.create({
         data: { name, admin },
-        secretKey: "some-long-password",
+        secretKey: "some-long-password", // In production phase, 'secretKey' should be stored on the server only
         expiresIn: "5m",
         response: res // This is required for inserting token into Header
     });
@@ -171,7 +173,7 @@ If you already have a signed token, you can transmit the token via query paramet
 app.get('/read_token_query', (req, res) => {
     const TOKEN_KEY = req.query.my_token;
     const token = tokie.read({
-        secretKey: "some-Complex-Password",
+        secretKey: "some-Complex-Password", // In production phase, 'secretKey' should be stored on the server only
         tokenKey: TOKEN_KEY // REQUIRED
     });
     if (token.error) {
@@ -194,7 +196,7 @@ If you want to read signed token from Header, you MUST include the `request` par
 app.get('/read_token_header', (req, res) => {    
     const token = tokie.read({
         type: "token", 
-        secretKey: "some-Complex-Password", 
+        secretKey: "some-Complex-Password", // In production phase, 'secretKey' should be stored on the server only
         request: req // This is REQUIRED for reading token from Header
     });
     if (token.error) {
