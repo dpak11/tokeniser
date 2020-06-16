@@ -6,8 +6,8 @@
 
 ### Tokie format
 
-Here is a sample Tokie output containing your encrypted `data`, token `expiration` limit and the `signature`.
-This will be base64 encoded and used as a token.
+Here is a sample Tokie output containing your encrypted `data`, token `expiration` period and the `signature`.
+Further this will be base64 encoded and used as a token.
 
 ```
 {
@@ -28,7 +28,7 @@ This will be base64 encoded and used as a token.
 
 `tokie.create()` will create a unique `token` using your `data` and `secretKey`. 
 
-`response` parameter is `optional`. If this parameter is included, then the `token` gets automatically attached to the `response header`. 
+You may include a `response` parameter for embedding the `token` to the `response header`. 
 
 > `Authorization Bearer {token}` 
 
@@ -36,9 +36,9 @@ This will be base64 encoded and used as a token.
 ```js
     tokie.create({
         data: { name: "joe", admin: "yes" },
-        secretKey: "token-complex-p@ssw0rd", // In production phase, 'secretKey' should be stored on the server only
+        secretKey: "token-complex-p@ssw0rd", // During 'production' phase, the secretKey should only be stored on the server side
         expiresIn: "5m", 
-        response: res // optional
+        response: res // OPTIONAL
     });
 
 ```
@@ -55,7 +55,7 @@ Here are some valid `expiresIn` examples:
 6h denotes 6 hours,
 5d denotes 5 days,
 
-and so on...
+etc...
 ```
 
 
@@ -65,11 +65,11 @@ and so on...
 
 There are 2 ways to read a `token`. 
 
-1. `tokie.read({tokenKey})` will read data from the `token` that is part of a query string parameter (token key).
+1. `tokie.read({tokenKey})` will read data from the `token` that was passed as a query string parameter.
 
 `tokenKey` parameter is `REQUIRED`.
 
-`request` parameter is `NOT REQUIRED`.
+In this case the `request` parameter is `NOT REQUIRED`.
 
 
 ```js
@@ -90,7 +90,7 @@ In this case, `request` parameter is `REQUIRED`.
 
 ```js
     const token = tokie.read({
-        secretKey: "some-Complex-Password", // In production phase, 'secretKey' should be stored on the server only
+        secretKey: "some-Complex-Password", // During 'production' phase, the secretKey should only be stored on the server side
         request: req // REQUIRED
     });
 
@@ -120,7 +120,7 @@ app.post('/createtoken', (req, res) => {
     const { name, admin } = req.body;
     const token = tokie.create({
         data: { name, admin },
-        secretKey: "some-long-password", // In production phase, 'secretKey' should be stored on the server only
+        secretKey: "some-long-password", // During 'production' phase, the secretKey should only be stored on the server side
         expiresIn: "15m" // token expires in 15 mins
     });
     if (token.error) {
@@ -143,7 +143,7 @@ app.post('/createtoken_header', (req, res) => {
     const { name, admin } = req.body;
     const token = tokie.create({
         data: { name, admin },
-        secretKey: "some-long-password", // In production phase, 'secretKey' should be stored on the server only
+        secretKey: "some-long-password", // During 'production' phase, the secretKey should only be stored on the server side
         expiresIn: "5m",
         response: res // This is required for inserting token into Header
     });
@@ -173,7 +173,7 @@ If you already have a signed token, you can transmit the token via query paramet
 app.get('/read_token_query', (req, res) => {
     const TOKEN_KEY = req.query.my_token;
     const token = tokie.read({
-        secretKey: "some-Complex-Password", // In production phase, 'secretKey' should be stored on the server only
+        secretKey: "some-Complex-Password", // During 'production' phase, the secretKey should only be stored on the server side
         tokenKey: TOKEN_KEY // REQUIRED
     });
     if (token.error) {
@@ -196,8 +196,8 @@ If you want to read signed token from Header, you MUST include the `request` par
 app.get('/read_token_header', (req, res) => {    
     const token = tokie.read({
         type: "token", 
-        secretKey: "some-Complex-Password", // In production phase, 'secretKey' should be stored on the server only
-        request: req // This is REQUIRED for reading token from Header
+        secretKey: "some-Complex-Password", // During 'production' phase, the secretKey should only be stored on the server side
+        request: req // This is REQUIRED for reading the token from Header
     });
     if (token.error) {
         return res.send(token.status);
