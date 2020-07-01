@@ -1,6 +1,6 @@
 # Tokie
 
-`Tokie` lets you securely share data in form of a `token` between server(NodeJS) and client, and between different parties in a compact, secure manner. To ensure integrity, a unique `signature`(digest) is generated using a `secretKey` and the data. Tokie uses `SHA256`
+`Tokie` lets you securely share data in form of a `token` between server(NodeJS) and client, and between different parties in a compact manner. To ensure integrity, a unique `signature`(digest) is generated using `SHA256`
 
 
 
