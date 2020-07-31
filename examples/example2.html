@@ -57,7 +57,8 @@
         fetch("../create_headertoken", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(_data) })
             .then(data => data.json())
             .then(response => {
-                if(response.token){                    
+                if(response.token){  
+                    form.reset();                  
                     queryDiv.innerText = `Received below Token from Server and saved to your Session Storage.\n
                     ${response.token}
                     `;

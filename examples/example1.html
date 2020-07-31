@@ -58,6 +58,7 @@
             .then(data => data.json())
             .then(response => {
                 if(response.token){
+                    form.reset();
                     const tokenLink = `http://localhost:3000/example1_read_token?token=${response.token}`;
                     queryDiv.innerText = `Token in Query Parameter:\n\n ${tokenLink}`;
                     anchor.setAttribute("href", tokenLink)

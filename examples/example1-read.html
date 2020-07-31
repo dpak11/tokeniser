@@ -47,13 +47,13 @@
         const queryDiv = document.querySelector("div");
         const anchor = document.querySelector("#readlink");
         let token = location.href.split("?token=")[1];
-        console.log("script loaded");
         form.addEventListener("submit", (e) => {
             e.preventDefault();
             fetch(`../read_tokenapi?token=${token}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({pass: form.pass.value}) })
                 .then(data => data.json())
                 .then(response => {
                     if(response.token){
+                        form.remove();
                         queryDiv.innerText = `Your Data:\n ${JSON.stringify(response.token)}
                             \n Your Token is:\n ${token}
                         `;

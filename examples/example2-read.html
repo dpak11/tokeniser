@@ -28,7 +28,7 @@
 
 <body>
     <h2>Example 2: From Session Storage, attach the token to Authorization Header and send to Server </h2>
-    <h3>Server validates token and password, then server sends back data from the token</h3>
+    <h3>Server validates token and password, then sends back data from the token</h3>
     <form>
         <span><input type="text" id="pass" placeholder="Enter correct password"></span>
         <span><input type="submit" value="Submit"></span>
@@ -59,6 +59,7 @@
                 .then(data => data.json())
                 .then(response => {
                     if (response.token) {
+                        form.remove();
                         queryDiv.innerText = `Your Data:\n ${JSON.stringify(response.token)}
                                 \n Header Token:\n Authorization Bearer ${token}
                             `;
