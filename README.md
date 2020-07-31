@@ -65,11 +65,11 @@ etc...
 
 There are 2 ways to read a `token`. 
 
-1. `tokie.read({tokenKey})` will read data from the `token` that was passed as a query string parameter.
+1. `tokie.read({tokenKey})` will read the encrypted data from the `token`(ie., tokenKey). This token is received either from a query string parameter or from inside the body of a POST api call.
 
 `tokenKey` parameter is `REQUIRED`.
 
-In this case the `request` parameter is `NOT REQUIRED`.
+In this case `request` parameter is `NOT REQUIRED`.
 
 
 ```js
@@ -160,7 +160,7 @@ app.post('/createtoken_header', (req, res) => {
 
 `tokie.read()` is used to read a token value.
 
-If you already have a signed token, you can transmit the token via query parameter. Below example, `my_token` contains your signed token.
+If you already have a signed token, you can transmit the token via query parameter. Below example, `my_token` contains your signed token. (Alternatively, you can pass the token inside the body of POST api call)
 
 `http://localhost:3000/read_token_query?my_token=eyJkYXRhIjoiYkY5c1gxZGZSVjkyjdkfrye8rfs`
 
