@@ -13,9 +13,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 //---------------- TOKEN Handling -----------------------
 
 
-// Save a Signed Token to the Header
 
-app.post('/create_tokenapi', (req, res) => {
+
+app.post('/create_token_ex1', (req, res) => {
     const { name, pass, descr, expiry } = req.body;
     const token = tokie.create({
         data: { name, descr },
@@ -29,9 +29,9 @@ app.post('/create_tokenapi', (req, res) => {
 
 });
 
-// Read a Signed Token from Header
 
-app.post('/read_tokenapi', (req, res) => {
+
+app.post('/read_token_ex1', (req, res) => {
     
     const apikey = req.query.token;
     const passwd = req.body.pass;
@@ -46,13 +46,12 @@ app.post('/read_tokenapi', (req, res) => {
 
 });
 
-app.post('/create_headertoken', (req, res) => {
+app.post('/create_token_ex2', (req, res) => {
     const { name, pass, descr, expiry } = req.body;
     const token = tokie.create({
         data: { name, descr },
         secretKey: pass,
-        expiresIn: expiry,
-        //response: res
+        expiresIn: expiry
     });
     if (token.error) {
         return res.json({error:token.status, token:null})
@@ -61,7 +60,7 @@ app.post('/create_headertoken', (req, res) => {
 
 });
 
-app.post('/read_headertoken', (req, res) => {
+app.post('/read_token_ex2', (req, res) => {
     const passwd = req.body.pass;
     const token = tokie.read({
         secretKey: passwd,
@@ -79,7 +78,7 @@ app.post('/read_headertoken', (req, res) => {
 
 
 app.get('/example1_create_token', (req, res) => {
-    res.sendFile(__dirname + "/examples/example1.html")
+    res.sendFile(__dirname + "/examples/example1-create.html")
 });
 
 
@@ -89,7 +88,7 @@ app.get('/example1_read_token', (req, res) => {
 
 
 app.get('/example2_create_token', (req, res) => {
-    res.sendFile(__dirname + "/examples/example2.html")
+    res.sendFile(__dirname + "/examples/example2-create.html")
 });
 
 app.get('/example2_read_token', (req, res) => {

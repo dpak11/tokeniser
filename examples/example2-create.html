@@ -54,7 +54,7 @@
         queryDiv.classList.add("hide");
         anchor.classList.add("hide");
         let _data = { name: form.name.value, pass: form.pass.value, descr: form.descr.value, expiry: `${form.expiry.value}m` };
-        fetch("../create_headertoken", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(_data) })
+        fetch("../create_token_ex2", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(_data) })
             .then(data => data.json())
             .then(response => {
                 if(response.token){  

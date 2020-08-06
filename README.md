@@ -28,22 +28,18 @@ Further this will be base64 encoded and used as a token.
 
 `tokie.create()` will create a unique `token` using your `data` and `secretKey`. 
 
-You may include a `response` parameter for embedding the `token` to the `response header`. 
-
-> `Authorization Bearer {token}` 
+RETURN value will be an encoded token.
 
 
 ```js
     tokie.create({
         data: { name: "joe", admin: "yes" },
         secretKey: "token-complex-p@ssw0rd", // During 'production' phase, the secretKey should only be stored on the server side
-        expiresIn: "5m", 
-        response: res // OPTIONAL
+        expiresIn: "5m"
     });
 
 ```
 
-If `response` is not included, then `tokie.create()` will simply return back the encoded token.
 
 `expiresIn` parameter is the expiry period of the token. This parameter is `required`
 
@@ -63,7 +59,7 @@ etc...
 
 ### Reading data from a `token`:
 
-There are 2 ways to read a `token`. 
+There are 2 ways to read a `token`:
 
 1. `tokie.read({tokenKey})` will read the encrypted data from the `token`(ie., tokenKey). This token is received either from a query string parameter or from inside the body of a POST api call.
 
@@ -83,7 +79,10 @@ In this case `request` parameter is `NOT REQUIRED`.
 
 2. `tokie.read({request})` will read data from the `token` that is embedded in `Authorization Header`.
 
-In this case, `request` parameter is `REQUIRED`.
+
+> `Authorization Bearer {token}` 
+
+The `request` parameter is `REQUIRED`.
 
 `tokenKey` parameter is `NOT REQUIRED`.
 
@@ -133,34 +132,11 @@ app.post('/createtoken', (req, res) => {
 ```
 
 
-2. **Create a Signed Token, attach it to Authorization Header and return back the token**
-
-Here the signed token gets attached in the response header because of the addition of `response` parameter.
-
-
-```js
-app.post('/createtoken_header', (req, res) => {
-    const { name, admin } = req.body;
-    const token = tokie.create({
-        data: { name, admin },
-        secretKey: "some-long-password", // During 'production' phase, the secretKey should only be stored on the server side
-        expiresIn: "5m",
-        response: res // This is required for inserting token into Header
-    });
-    if (token.error) {
-        return res.send(token.status);
-    }
-    res.send(token.value)
-
-});
-
-```
-
-3. **Read a Signed Token from Query Parameter:**
+2. **Read a Signed Token from Query Parameter:**
 
 `tokie.read()` is used to read a token value.
 
-If you already have a signed token, you can transmit the token via query parameter. Below example, `my_token` contains your signed token. (Alternatively, you can pass the token inside the body of POST api call)
+If you already have a signed token, you can transmit the token via query parameter. Below example, `my_token` contains your signed token. (Alternatively, you can pass the token inside the body during a POST method call)
 
 `http://localhost:3000/read_token_query?my_token=eyJkYXRhIjoiYkY5c1gxZGZSVjkyjdkfrye8rfs`
 
