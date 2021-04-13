@@ -49,28 +49,30 @@
     const form = document.querySelector("form");
     const queryDiv = document.querySelector("div");
     const anchor = document.querySelector("#readlink");
+
+    const submitData = async (data) => {
+        const postdata = await fetch("../create_token_ex2", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
+        const response = await postdata.json();
+        if(response.token){  
+            form.reset();                  
+            queryDiv.innerText = `Received below Token from Server and saved to your Session Storage.\n
+            ${response.token}
+            `;
+            queryDiv.classList.remove("hide");
+            anchor.classList.remove("hide");
+            sessionStorage.setItem("tokie_example2",response.token)
+        }else{
+            queryDiv.textContent = response.error;
+            queryDiv.classList.remove("hide");
+        }
+
+    }
     form.addEventListener("submit", (e) => {
         e.preventDefault();
         queryDiv.classList.add("hide");
         anchor.classList.add("hide");
-        let _data = { name: form.name.value, pass: form.pass.value, descr: form.descr.value, expiry: `${form.expiry.value}m` };
-        fetch("../create_token_ex2", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(_data) })
-            .then(data => data.json())
-            .then(response => {
-                if(response.token){  
-                    form.reset();                  
-                    queryDiv.innerText = `Received below Token from Server and saved to your Session Storage.\n
-                    ${response.token}
-                    `;
-                    queryDiv.classList.remove("hide");
-                    anchor.classList.remove("hide");
-                    sessionStorage.setItem("tokie_example2",response.token)
-                }else{
-                    queryDiv.textContent = response.error;
-                    queryDiv.classList.remove("hide");
-                }
-                
-            });
+        const data = { name: form.name.value, pass: form.pass.value, descr: form.descr.value, expiry: `${form.expiry.value}m` };
+        submitData(data)
     });
     
     </script>

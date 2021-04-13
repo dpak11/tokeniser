@@ -45,29 +45,30 @@
     const queryDiv = document.querySelector("div");
     const anchor = document.querySelector("#readlink");
     const token = sessionStorage.getItem("tokie_example2");
-    if (token) {
-        form.addEventListener("submit", (e) => {
-            e.preventDefault();
-            fetch(`../read_token_ex2`, {
+    const submitToken = async () => {
+        const postdata = await fetch(`../read_token_ex2`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
                         "Authorization": 'Bearer ' + token
                     },
                     body: JSON.stringify({ pass: form.pass.value })
-                })
-                .then(data => data.json())
-                .then(response => {
-                    if (response.token) {
-                        form.remove();
-                        queryDiv.innerText = `Your Data:\n ${JSON.stringify(response.token)}
-                                \n Header Token:\n Authorization Bearer ${token}
-                            `;
-                    } else {
-                        queryDiv.textContent = `${response.error}`;
-                    }
-
                 });
+        const response = await postdata.json();
+        if (response.token) {
+            form.remove();
+            queryDiv.innerText = `Your Data:\n ${JSON.stringify(response.token)}
+                    \n Header Token:\n Authorization Bearer ${token}
+                `;
+        } else {
+            queryDiv.textContent = `${response.error}`;
+        }       
+
+    }
+    if (token) {
+        form.addEventListener("submit", (e) => {
+            e.preventDefault();
+            submitToken();
         });
     } else {
         queryDiv.innerText = "Token is missing or deleted"
