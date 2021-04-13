@@ -46,24 +46,25 @@
         const form = document.querySelector("form");
         const queryDiv = document.querySelector("div");
         const anchor = document.querySelector("#readlink");
-        let token = location.href.split("?token=")[1];
+        const token = location.href.split("?token=")[1];
+
+        const submitToken = async () => {
+            const postdata = await fetch(`../read_token_ex1?token=${token}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({pass: form.pass.value}) });
+            const response = await postdata.json();
+            if(response.token){
+                form.remove();
+                queryDiv.innerText = `Your Data:\n ${JSON.stringify(response.token)}
+                    \n Your Token is:\n ${token}
+                `;
+            }else{
+                queryDiv.textContent = `${response.error}`;
+            }
+            queryDiv.classList.remove("hide")
+        }
+
         form.addEventListener("submit", (e) => {
             e.preventDefault();
-            fetch(`../read_token_ex1?token=${token}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({pass: form.pass.value}) })
-                .then(data => data.json())
-                .then(response => {
-                    if(response.token){
-                        form.remove();
-                        queryDiv.innerText = `Your Data:\n ${JSON.stringify(response.token)}
-                            \n Your Token is:\n ${token}
-                        `;
-                    }
-                    else{
-                        queryDiv.textContent = `${response.error}`;
-                    }
-                    queryDiv.classList.remove("hide")
-                    
-                });
+            submitToken();
         });
 
     </script>

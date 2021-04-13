@@ -89,7 +89,7 @@ The `request` parameter is `REQUIRED`.
 
 ```js
     const token = tokie.read({
-        secretKey: "some-Complex-Password", // The secretKey should only be stored on the server side
+        secretKey: "some-Password", // The secretKey should only be stored on the server side
         request: req // REQUIRED
     });
 
@@ -119,7 +119,7 @@ app.post('/createtoken', (req, res) => {
     const { name, admin } = req.body;
     const token = tokie.create({
         data: { name, admin },
-        secretKey: "some-long-password", // The secretKey should only be stored on the server side
+        secretKey: "some-password", // The secretKey should only be stored on the server side
         expiresIn: "15m" // token expires in 15 mins
     });
     if (token.error) {
@@ -136,7 +136,7 @@ app.post('/createtoken', (req, res) => {
 
 `tokie.read()` is used to read a token value.
 
-If you already have a signed token, you can transmit the token via query parameter. Below example, `my_token` contains your signed token. (Alternatively, you can pass the token inside the body during a POST method call)
+If you have a signed token, you can transmit the token via query parameter. In the Below example, `my_token` contains your signed token. (Alternatively, you can pass the token inside the body during a POST method call)
 
 `http://localhost:3000/read_token_query?my_token=eyJkYXRhIjoiYkY5c1gxZGZSVjkyjdkfrye8rfs`
 
@@ -149,7 +149,7 @@ If you already have a signed token, you can transmit the token via query paramet
 app.get('/read_token_query', (req, res) => {
     const TOKEN_KEY = req.query.my_token;
     const token = tokie.read({
-        secretKey: "some-Complex-Password", // The secretKey should only be stored on the server side
+        secretKey: "some-Password", // The secretKey should only be stored on the server side
         tokenKey: TOKEN_KEY // REQUIRED
     });
     if (token.error) {
@@ -172,7 +172,7 @@ If you want to read signed token from Header, you MUST include the `request` par
 app.get('/read_token_header', (req, res) => {    
     const token = tokie.read({
         type: "token", 
-        secretKey: "some-Complex-Password", // The secretKey should only be stored on the server side
+        secretKey: "some-Password", // The secretKey should only be stored on the server side
         request: req // This is REQUIRED for reading the token from Header
     });
     if (token.error) {

@@ -49,28 +49,32 @@
     const form = document.querySelector("form");
     const queryDiv = document.querySelector("div");
     const anchor = document.querySelector("#readlink");
+    
+    const submitData = async (data) => {
+        const postdata = await fetch("../create_token_ex1", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
+        const response = await postdata.json();
+        if(response.token){
+            form.reset();
+            const tokenLink = `http://localhost:3000/example1_read_token?token=${response.token}`;
+            queryDiv.innerText = `Token in Query Parameter:\n\n ${tokenLink}`;
+            anchor.setAttribute("href", tokenLink)
+            queryDiv.classList.remove("hide");
+            anchor.classList.remove("hide");
+        }else{
+            queryDiv.textContent = response.error;
+            queryDiv.classList.remove("hide");
+        }
+
+    }
+
     form.addEventListener("submit", (e) => {
         e.preventDefault();
         queryDiv.classList.add("hide");
         anchor.classList.add("hide");
-        let _data = { name: form.name.value, pass: form.pass.value, descr: form.descr.value, expiry: `${form.expiry.value}m` };
-        fetch("../create_token_ex1", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(_data) })
-            .then(data => data.json())
-            .then(response => {
-                if(response.token){
-                    form.reset();
-                    const tokenLink = `http://localhost:3000/example1_read_token?token=${response.token}`;
-                    queryDiv.innerText = `Token in Query Parameter:\n\n ${tokenLink}`;
-                    anchor.setAttribute("href", tokenLink)
-                    queryDiv.classList.remove("hide");
-                    anchor.classList.remove("hide");
-                }else{
-                    queryDiv.textContent = response.error;
-                    queryDiv.classList.remove("hide");
-                }
-                
-            });
+        const data = { name: form.name.value, pass: form.pass.value, descr: form.descr.value, expiry: `${form.expiry.value}m` };
+        submitData(data);
     });
+
     
     </script>
 </body>
