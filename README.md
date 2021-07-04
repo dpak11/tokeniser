@@ -97,6 +97,14 @@ The `request` parameter is `REQUIRED`.
 
 ---
 
+
+## Installation:
+
+`npm install tokie`
+
+
+
+
 ## Token Usage (app.js)
 
 1. **Create a Signed Token and return the token, but do not attach it to Header**
